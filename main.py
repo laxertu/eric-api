@@ -7,20 +7,14 @@ from sse_starlette.sse import EventSourceResponse
 server_channel = SSEChannel()
 
 class ApiMessageListener(MessageQueueListener):
-
-    def __init__(self, request: Request):
-
-        super().__init__()
-        self.__request = request
-
-    async def is_running(self) -> bool:
-        return not await self.__request.is_disconnected() and await super().is_running()
+    ...
 
 
 app = FastAPI()
 
 @app.post("/subscribe")
 async def subscribe():
+    l = ApiMessageListener()
     l = server_channel.add_listener(ApiMessageListener)
     return {"listener_id": l.id}
 
@@ -36,4 +30,7 @@ async def send(listener_id: str, msg: Message):
 @app.get("/stream/{listener_id}")
 async def stream(request: Request, listener_id: str):
     listener = server_channel.get_listener(listener_id)
+    if request.is_disconnected():
+        server_channel.dispatch(listener, Message(type="connection_closed"))
+        await listener.stop()
     return EventSourceResponse(await server_channel.message_stream(listener))
