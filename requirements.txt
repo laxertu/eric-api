@@ -1,0 +1,2 @@
+git+https://github.com/laxertu/eric.git
+sse-starlette==2.0.0
