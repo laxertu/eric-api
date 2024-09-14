@@ -14,13 +14,8 @@ class ApiMessageListener(MessageQueueListener):
         self.__request = request
 
     async def is_running(self) -> bool:
-        if await self.__request.is_disconnected():
-            return False
-        else:
-            return await super().is_running()
+        return not await self.__request.is_disconnected() and await super().is_running()
 
-    def on_message(self, msg: Message) -> None:
-        logging.info("Message received")
 
 app = FastAPI()
 
