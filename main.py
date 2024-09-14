@@ -10,14 +10,7 @@ class BroadCastListener(MessageQueueListener):
     def on_message(self, msg: Message) -> None:
         server_channel.broadcast(msg)
 
-
-
 app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
 
 @app.post("/subscribe")
 async def subscribe():
