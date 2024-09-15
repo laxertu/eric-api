@@ -1,7 +1,11 @@
+from logging import getLogger
+
 from fastapi import FastAPI, Request
 from eric.entities import MessageQueueListener, Message
 from eric.servers import ChannelContainer
 from sse_starlette.sse import EventSourceResponse
+
+logger = getLogger(__name__)
 
 channel_container = ChannelContainer()
 
@@ -34,7 +38,7 @@ async def stream(request: Request, channel_id: str, listener_id: str):
     channel = channel_container.get(channel_id)
     listener = channel.get_listener(listener_id)
     await listener.start()
-    print(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
+    #logger.info(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
     if await request.is_disconnected():
         channel.dispatch(listener, Message(type="connection_closed"))
         await listener.stop()
