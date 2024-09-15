@@ -2,7 +2,7 @@ A ready - to use SSE messaging API. Intended for internal use only (all is publi
 
 Features:
 * channel subscription
-* broadcating
+* broadcasting
 * message deliver to one client
 * SSE compliant streaming
 
