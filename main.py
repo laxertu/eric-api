@@ -7,6 +7,12 @@ channel_container = ChannelContainer()
 
 app = FastAPI()
 
+@app.put("/create")
+async def create():
+    channel = channel_container.add()
+    return {"channel_id": channel.id}
+
+
 @app.post("/subscribe")
 async def subscribe(channel_id: str):
     channel_container.get(channel_id).add_listener(MessageQueueListener)
@@ -27,7 +33,9 @@ async def send(channel_id: str, listener_id: str, msg: Message):
 async def stream(request: Request, channel_id: str, listener_id: str):
     channel = channel_container.get(channel_id)
     listener = channel.get_listener(listener_id)
-    if request.is_disconnected():
+    await listener.start()
+    print(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
+    if await request.is_disconnected():
         channel.dispatch(listener, Message(type="connection_closed"))
         await listener.stop()
     return EventSourceResponse(await channel.message_stream(listener))
