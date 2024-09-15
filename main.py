@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from eric.model import MessageQueueListener, Message
+from eric.entities import MessageQueueListener, Message
 from eric.servers import ChannelContainer
 from sse_starlette.sse import EventSourceResponse
 
