@@ -19,7 +19,6 @@ async def create():
 
 @app.post("/subscribe")
 async def subscribe(channel_id: str):
-    channel_container.get(channel_id).add_listener(MessageQueueListener)
     l = channel_container.get(channel_id).add_listener(MessageQueueListener)
     return {"listener_id": l.id}
 
