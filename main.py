@@ -27,4 +27,7 @@ async def send(channel_id: str, listener_id: str, msg: Message):
 async def stream(request: Request, channel_id: str, listener_id: str):
     channel = channel_container.get(channel_id)
     listener = channel.get_listener(listener_id)
+    if request.is_disconnected():
+        channel.dispatch(listener, Message(type="connection_closed"))
+        await listener.stop()
     return EventSourceResponse(await channel.message_stream(listener))
