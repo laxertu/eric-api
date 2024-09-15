@@ -40,6 +40,5 @@ async def stream(request: Request, channel_id: str, listener_id: str):
     await listener.start()
     #logger.info(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
     if await request.is_disconnected():
-        channel.dispatch(listener, Message(type="connection_closed"))
         await listener.stop()
     return EventSourceResponse(await channel.message_stream(listener))
