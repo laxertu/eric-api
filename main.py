@@ -1,8 +1,8 @@
 from logging import getLogger
 
 from fastapi import FastAPI, Request
-from eric.entities import Message
-from eric.servers import ChannelContainer
+from eric_sse.entities import Message
+from eric_sse.servers import ChannelContainer
 from sse_starlette.sse import EventSourceResponse
 
 logger = getLogger(__name__)

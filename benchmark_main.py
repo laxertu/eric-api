@@ -3,7 +3,7 @@ import time
 from logging import getLogger
 
 from fastapi import FastAPI, Request
-from eric.entities import Message, DataProcessingChannel, ThreadPoolListener
+from eric_sse.entities import Message, DataProcessingChannel, ThreadPoolListener
 from pydantic.dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
