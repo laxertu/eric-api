@@ -39,7 +39,7 @@ listener_sse = BenchMarkListener()
 channel.register_listener(listener_sse)
 
 def create_fixture() -> list[dict]:
-    return [{f'x': x} for x in range(1, 1000)]
+    return [{f'x': x} for x in range(1, FIXTURE_SIZE)]
 
 async def do_blocking_request(response: list[dict]):
     print('doing blocking opertion')
