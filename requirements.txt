@@ -1,3 +1,4 @@
+requests
 git+https://github.com/laxertu/eric.git
 fastapi[standard]
 sse-starlette==2.0.0
