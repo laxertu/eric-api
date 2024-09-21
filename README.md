@@ -8,7 +8,7 @@ Features:
 
 **benchmark_main.py** is a server intended for benchmarking, it simulates a quite common use case:
 
-API depends on an external resource and needs to maka a blocking call to it, process the result
+API depends on an external resource and needs to make a blocking call to it, process the result
 and return.
 
 **mb.py** is a script that tests performance for naive implementation and the one that uses a 
