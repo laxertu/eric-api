@@ -8,10 +8,10 @@ Features:
 
 **benchmark_main.py** is a server intended for benchmarking, it simulates a quite common use case:
 
-API depends on an external resource and needs to maka a bloking call to it, process the result
+API depends on an external resource and needs to maka a blocking call to it, process the result
 and return.
 
-The use case consists of 1000 dictionaries returned by a clocking call that 
+The use case consists of 1000 dictionaries returned by a blocking call that 
 adds a delay of 0.5 seconds, processing time of each of them is 0.02 seconds.
 
 **mb.py** is a script that tests performance for naive implementation and the one that uses a 
