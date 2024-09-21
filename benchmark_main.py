@@ -2,15 +2,14 @@ import asyncio
 import time
 from logging import getLogger
 from typing import Any
-
 from fastapi import FastAPI, Request
 from eric.entities import Message, MessageQueueListener, AbstractChannel
 from sse_starlette.sse import EventSourceResponse
 
 logger = getLogger(__name__)
 
-PROCESS_TIME = 0.2
-BLOCKING_OPERATION_TIME = 0.5
+PROCESS_TIME = 0.02
+BLOCKING_OPERATION_TIME = 5.0
 
 class BenchMarkChannel(AbstractChannel):
 
@@ -24,7 +23,7 @@ class BenchMarkListener(MessageQueueListener):
 
     def on_message(self, msg: Message) -> None:
         if msg.type == 'end':
-            self.stop()
+            self.stop_sync()
         else:
             process_item(msg.payload)
 
@@ -45,7 +44,7 @@ def process_item(item: dict) -> dict:
 
 app = FastAPI()
 
-@app.put("/start_get")
+@app.get("/start_get")
 async def create():
     response = await do_blocking_request(create_fixture())
     return [process_item(x) for x in response]
@@ -56,9 +55,13 @@ async def stream(request: Request):
     response = await do_blocking_request(create_fixture())
     for m in response:
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
+    channel.dispatch(listener_sse.id, Message(type='end'))
     await listener_sse.start()
     # logger.info(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
     if await request.is_disconnected():
         await listener_sse.stop()
+
     return EventSourceResponse(await channel.message_stream(listener_sse))
+
+
 
