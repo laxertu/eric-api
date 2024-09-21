@@ -5,11 +5,13 @@ from typing import Any
 from fastapi import FastAPI, Request
 from eric.entities import Message, MessageQueueListener, AbstractChannel
 from sse_starlette.sse import EventSourceResponse
+from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor
 
 logger = getLogger(__name__)
 
 PROCESS_TIME = 0.02
-BLOCKING_OPERATION_TIME = 5.0
+BLOCKING_OPERATION_TIME = 0.5
 
 class BenchMarkChannel(AbstractChannel):
 
@@ -19,13 +21,18 @@ class BenchMarkChannel(AbstractChannel):
     def notify_end(self):
         self.broadcast(Message(type='end'))
 
+
 class BenchMarkListener(MessageQueueListener):
+    def __init__(self):
+        super().__init__()
+        self.executor = ThreadPoolExecutor(max_workers=6)
 
     def on_message(self, msg: Message) -> None:
         if msg.type == 'end':
             self.stop_sync()
         else:
-            process_item(msg.payload)
+            self.executor.submit(process_item, msg.payload)
+
 
 channel = BenchMarkChannel()
 listener_sse = BenchMarkListener()
@@ -35,10 +42,13 @@ def create_fixture() -> list[dict]:
     return [{f'x': x} for x in range(1, 1000)]
 
 async def do_blocking_request(response: list[dict]):
+    print('doing blocking opertion')
     await asyncio.sleep(BLOCKING_OPERATION_TIME)
+    print('Done')
     return response
 
 def process_item(item: dict) -> dict:
+    print('do processing')
     time.sleep(PROCESS_TIME)
     return item
 
