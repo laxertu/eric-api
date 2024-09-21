@@ -5,13 +5,13 @@ from typing import Any
 from fastapi import FastAPI, Request
 from eric.entities import Message, MessageQueueListener, AbstractChannel
 from sse_starlette.sse import EventSourceResponse
-from multiprocessing import Pool
 from concurrent.futures import ThreadPoolExecutor
 
 logger = getLogger(__name__)
 
 PROCESS_TIME = 0.02
 BLOCKING_OPERATION_TIME = 0.5
+FIXTURE_SIZE = 1000
 
 class BenchMarkChannel(AbstractChannel):
 
