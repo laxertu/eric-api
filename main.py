@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from fastapi import FastAPI, Request
-from eric.entities import MessageQueueListener, Message
+from eric.entities import Message
 from eric.servers import ChannelContainer
 from sse_starlette.sse import EventSourceResponse
 
@@ -19,7 +19,7 @@ async def create():
 
 @app.post("/subscribe")
 async def subscribe(channel_id: str):
-    l = channel_container.get(channel_id).add_listener(MessageQueueListener)
+    l = channel_container.get(channel_id).add_listener()
     return {"listener_id": l.id}
 
 @app.post("/broadcast")
@@ -29,8 +29,7 @@ async def broadcast(channel_id: str, msg: Message):
 
 @app.post("/dispatch")
 async def send(channel_id: str, listener_id: str, msg: Message):
-    channel = channel_container.get(channel_id)
-    channel.dispatch(listener=channel.get_listener(listener_id), msg=msg)
+    channel_container.get(channel_id).dispatch(listener_id, msg)
 
 @app.get("/stream/{channel_id}/{listener_id}")
 async def stream(request: Request, channel_id: str, listener_id: str):
