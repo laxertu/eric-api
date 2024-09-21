@@ -18,13 +18,10 @@ def create_fixture() -> list[dict]:
     return [{f'x': x} for x in range(1, FIXTURE_SIZE)]
 
 async def do_blocking_request(response: list[dict]):
-    print('doing blocking opertion')
     await asyncio.sleep(BLOCKING_OPERATION_TIME)
-    print('Done')
     return response
 
 def process_item(item: dict) -> dict:
-    print('do processing')
     time.sleep(PROCESS_TIME)
     return item
 
@@ -48,7 +45,7 @@ async def stream(request: Request):
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
     channel.dispatch(listener_sse.id, Message(type='_eric_channel_closed'))
     await listener_sse.start()
-    # logger.info(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
+    logger.info(f"wget -q -S -O - 127.0.0.1:8000/start_sse 2>&1")
     if await request.is_disconnected():
         await listener_sse.stop()
 
