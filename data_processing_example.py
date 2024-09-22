@@ -19,7 +19,7 @@ class BenchmarkParams:
 
 
 def create_fixture(size: int) -> list[dict]:
-    # Put here examples of what your blocking call returns
+    # Put here examples of what your blocking call returns if you want to do isolated performance tests
     return [{f'x': x} for x in range(1, size)]
 
 
@@ -28,7 +28,7 @@ async def do_blocking_request(params: BenchmarkParams, fixture_response: list[di
         await asyncio.sleep(params.blocking_operation_time)
         return fixture_response
     else:
-        return []
+        await send_blocking_request(params)
 
 def process_item(time_to_wait: float, item: dict) -> dict:
     time.sleep(time_to_wait)
@@ -40,7 +40,7 @@ listener_sse = ThreadPoolListener(callback=process_item, max_workers=MAX_WORKERS
 channel.register_listener(listener_sse)
 
 async def send_blocking_request(params: BenchmarkParams):
-    # replace here with your blocking call
+    # replace here with your blocking call if you want to test live integration
     return await do_blocking_request(params=params, fixture_response=create_fixture(params.fixture_size))
 
 app = FastAPI()
