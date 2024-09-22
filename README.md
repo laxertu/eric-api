@@ -6,7 +6,7 @@ Features:
 * message deliver to one client
 * SSE compliant streaming
 
-**data_processing_example.py** is a server intended for both showing an example of bound I/O API
+**data_processing_example.py** is a server intended for both showing an example of I/O bound API
 and providing a sandbox to benchmark your business logic
 
 it simulates a quite common use case:
