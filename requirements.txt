@@ -1,4 +1,4 @@
 requests
-eric-sse==0.1.0
+eric-sse>=0.1.0
 fastapi[standard]
 sse-starlette==2.0.0
