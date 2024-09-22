@@ -1,4 +1,4 @@
-A ready - to use SSE messaging microservice implementation. 
+A ready-to-use SSE messaging microservice implementation. 
 Intended for internal use only (all is public here by the moment).
 
 Backend relies on https://github.com/laxertu/eric
