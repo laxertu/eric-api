@@ -1,4 +1,6 @@
-A ready - to use SSE messaging API. Intended for internal use only (all is public here by the moment)
+A ready - to use SSE messaging API. Intended for internal use only (all is public here by the moment).
+
+Backend relies on https://github.com/laxertu/eric
 
 Features:
 * channel subscription
