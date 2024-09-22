@@ -4,6 +4,7 @@ from logging import getLogger
 
 from fastapi import FastAPI, Request
 from eric_sse.prefabs import Message, DataProcessingChannel, ThreadPoolListener
+from eric_sse.entities import MESSAGE_TYPE_CLOSED
 from dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
@@ -60,7 +61,7 @@ async def stream_data(request: Request, params: BenchmarkParams):
     for m in response:
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
 
-    channel.dispatch(listener_sse.id, Message(type='_eric_channel_closed'))
+    channel.dispatch(listener_sse.id, Message(type=MESSAGE_TYPE_CLOSED))
     await listener_sse.start()
     if await request.is_disconnected():
         await listener_sse.stop()
