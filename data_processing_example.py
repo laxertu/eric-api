@@ -4,7 +4,7 @@ from logging import getLogger
 
 from fastapi import FastAPI, Request
 from eric_sse.entities import Message, DataProcessingChannel, ThreadPoolListener
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
 logger = getLogger(__name__)
