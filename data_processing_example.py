@@ -31,6 +31,7 @@ async def do_blocking_request(params: BenchmarkParams, fixture_response: list[di
         await send_blocking_request(params)
 
 def process_item(time_to_wait: float, item: dict) -> dict:
+    # Replace the mocking code with your business logic
     time.sleep(time_to_wait)
     return item
 
