@@ -36,10 +36,6 @@ def process_item(time_to_wait: float, item: dict) -> dict:
     return item
 
 
-channel = DataProcessingChannel()
-listener_sse = ThreadPoolListener(callback=process_item, max_workers=MAX_WORKERS)
-channel.register_listener(listener_sse)
-
 async def send_blocking_request(params: BenchmarkParams):
     # replace here with your blocking call if you want to test live integration
     return await do_blocking_request(params=params, fixture_response=create_fixture(params.fixture_size))
@@ -56,6 +52,10 @@ async def get_data(params: BenchmarkParams):
 @app.post("/start_sse")
 async def stream_data(request: Request, params: BenchmarkParams):
     response = await send_blocking_request(params)
+
+    listener_sse = ThreadPoolListener(callback=process_item, max_workers=MAX_WORKERS)
+    channel = DataProcessingChannel()
+    channel.register_listener(listener_sse)
 
     for m in response:
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
