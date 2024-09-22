@@ -19,5 +19,5 @@ make a blocking call to it, process the result and return.
 Listener that relies on a pool of 6 threads. 
 
 You can modify it and the server to test different input processing 
-strategies performance, in both "isolated mode", by mocking server responses, or in "end to end mode", by calling to 
+strategies performance, in both "isolated mode", by mocking blocking calls responses, or in "end to end mode", by calling to 
 your code in send_blocking_request function of the server  
