@@ -3,7 +3,7 @@ import time
 from logging import getLogger
 
 from fastapi import FastAPI, Request
-from eric_sse.entities import Message, DataProcessingChannel, ThreadPoolListener
+from eric_sse.prefabs import Message, DataProcessingChannel, ThreadPoolListener
 from dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
