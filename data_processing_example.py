@@ -12,17 +12,23 @@ MAX_WORKERS = 6
 
 @dataclass
 class BenchmarkParams:
+    """Put here the parameters needed to your I/O bound call"""
     item_process_time: float
     blocking_operation_time: float
     fixture_size: int
 
 
 def create_fixture(size: int) -> list[dict]:
+    # Put here examples of what your blocking call returns
     return [{f'x': x} for x in range(1, size)]
 
-async def do_blocking_request(time_to_wait: float, response: list[dict]):
-    await asyncio.sleep(time_to_wait)
-    return response
+
+async def do_blocking_request(params: BenchmarkParams, fixture_response: list[dict] | None = None) -> list[dict]:
+    if fixture_response is not None:
+        await asyncio.sleep(params.blocking_operation_time)
+        return fixture_response
+    else:
+        return []
 
 def process_item(time_to_wait: float, item: dict) -> dict:
     time.sleep(time_to_wait)
@@ -33,19 +39,26 @@ channel = DataProcessingChannel()
 listener_sse = ThreadPoolListener(callback=process_item, max_workers=MAX_WORKERS)
 channel.register_listener(listener_sse)
 
+async def send_blocking_request(params: BenchmarkParams):
+    # replace here with your blocking call
+    return await do_blocking_request(params=params, fixture_response=create_fixture(params.fixture_size))
+
 app = FastAPI()
 
 @app.post("/start_get")
 async def get_data(params: BenchmarkParams):
-    response = await do_blocking_request(params.blocking_operation_time, create_fixture(params.fixture_size))
+    response = await send_blocking_request(params)
+
     return [process_item(params.item_process_time, x) for x in response]
 
 
 @app.post("/start_sse")
 async def stream_data(request: Request, params: BenchmarkParams):
-    response = await do_blocking_request(params.blocking_operation_time, create_fixture(params.fixture_size))
+    response = await send_blocking_request(params)
+
     for m in response:
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
+
     channel.dispatch(listener_sse.id, Message(type='_eric_channel_closed'))
     await listener_sse.start()
     if await request.is_disconnected():

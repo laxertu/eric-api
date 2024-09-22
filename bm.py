@@ -1,11 +1,24 @@
 import sys
 from concurrent.futures import ThreadPoolExecutor
 import requests, time
+def get_param(pos: int, default_value: str):
+    try:
+        return sys.argv[pos]
+    except IndexError:
+        return default_value
+
+print("usage: python bm.py item_process_time blocking_operation_time fixture_size")
+print("example: python bm.py 0.2 0.5 10")
+
+item_process_time = get_param(1, '0.2')
+blocking_operation_time = get_param(2, '0.5')
+fixture_size = get_param(3, '50')
+
 
 benchmark_params = {
-  "item_process_time": float(sys.argv[1]),
-  "blocking_operation_time": float(sys.argv[2]),
-  "fixture_size": int(sys.argv[3])
+  "item_process_time": float(item_process_time), # Duration of item processing step
+  "blocking_operation_time": float(blocking_operation_time), # Duration of blocking operation time
+  "fixture_size": int(fixture_size) # Size of fixture
 }
 
 print("Launching with", benchmark_params)
