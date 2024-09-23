@@ -1,6 +1,7 @@
 import asyncio
 import time
 from logging import getLogger
+from typing import Callable
 
 from fastapi import FastAPI, Request
 from eric_sse.prefabs import Message, DataProcessingChannel, ThreadPoolListener
@@ -19,9 +20,20 @@ class BenchmarkParams:
     fixture_size: int
 
 
+class Consumer(ThreadPoolListener):
+
+    def __init__(self, benchmark_params: BenchmarkParams, callback: Callable[[Message], None], max_workers: int):
+        super().__init__(callback=callback, max_workers=max_workers)
+        self.__benchmark_params = benchmark_params
+
+    def on_message(self, msg: Message) -> None:
+        time.sleep(self.__benchmark_params.item_process_time)
+        super().on_message(msg)
+
+
 def create_fixture(size: int) -> list[dict]:
     # Put here examples of what your blocking call returns if you want to do isolated performance tests
-    return [{f'x': x} for x in range(1, size)]
+    return [{f'{x}': x} for x in range(1, size)]
 
 
 async def do_blocking_request(params: BenchmarkParams, fixture_response: list[dict] | None = None) -> list[dict]:
@@ -31,11 +43,14 @@ async def do_blocking_request(params: BenchmarkParams, fixture_response: list[di
     else:
         await send_blocking_request(params)
 
-def process_item(time_to_wait: float, item: dict) -> dict:
+def process_item(item: dict) -> None:
     # Replace the mocking code with your business logic
-    time.sleep(time_to_wait)
-    return item
+    item['processed'] = True
 
+
+def process_message(message: Message):
+    i = message.payload
+    process_item(item=i)
 
 async def send_blocking_request(params: BenchmarkParams):
     # replace here with your blocking call if you want to test live integration
@@ -45,16 +60,22 @@ app = FastAPI()
 
 @app.post("/start_get")
 async def get_data(params: BenchmarkParams):
+    result = []
     response = await send_blocking_request(params)
 
-    return [process_item(params.item_process_time, x) for x in response]
+    for item in response:
+        await asyncio.sleep(params.item_process_time)
+        process_item(item)
+        result.append(item)
+
+    return result
 
 
 @app.post("/start_sse")
 async def stream_data(request: Request, params: BenchmarkParams):
     response = await send_blocking_request(params)
 
-    listener_sse = ThreadPoolListener(callback=process_item, max_workers=MAX_WORKERS)
+    listener_sse = ThreadPoolListener(callback=process_message, max_workers=MAX_WORKERS)
     channel = DataProcessingChannel()
     channel.register_listener(listener_sse)
 
