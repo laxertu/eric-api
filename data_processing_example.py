@@ -79,6 +79,7 @@ async def stream_data(request: Request, params: BenchmarkParams):
     listener_sse = channel.add_threaded_listener(process_message)
 
     for m in response:
+        await asyncio.sleep(params.item_process_time)
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
 
     channel.dispatch(listener_sse.id, Message(type=MESSAGE_TYPE_CLOSED))
