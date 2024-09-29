@@ -10,9 +10,9 @@ def get_param(pos: int, default_value: str):
 print("usage: python bm.py item_process_time blocking_operation_time fixture_size")
 print("example: python bm.py 0.2 0.5 10")
 
-item_process_time = get_param(1, '0.001')
+item_process_time = get_param(1, '0.02')
 blocking_operation_time = get_param(2, '0.5')
-fixture_size = get_param(3, '10000')
+fixture_size = get_param(3, '200')
 
 
 benchmark_params = {
