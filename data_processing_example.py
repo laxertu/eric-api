@@ -1,9 +1,13 @@
 import asyncio
+import concurrent.futures
+
 import time
-from logging import getLogger
+from logging import getLogger, exception
 from typing import Callable
 
 from fastapi import FastAPI, Request
+
+
 from eric_sse.prefabs import Message, DataProcessingChannel, ThreadPoolListener
 from eric_sse.entities import MESSAGE_TYPE_CLOSED
 from dataclasses import dataclass
@@ -21,13 +25,19 @@ class BenchmarkParams:
 
 
 class Consumer(ThreadPoolListener):
-
-    def __init__(self, benchmark_params: BenchmarkParams, callback: Callable[[Message], None], max_workers: int):
-        super().__init__(callback=callback, max_workers=max_workers)
+    from concurrent.futures import ThreadPoolExecutor
+    def __init__(
+            self,
+            benchmark_params: BenchmarkParams,
+            callback: Callable[[Message], None],
+            executor: ThreadPoolExecutor
+    ):
+        super().__init__(executor=executor, callback=callback)
         self.__benchmark_params = benchmark_params
 
     def on_message(self, msg: Message) -> None:
-        time.sleep(self.__benchmark_params.item_process_time)
+        print(f'Sleeping async {self.__benchmark_params.item_process_time}')
+        #time.sleep(self.__benchmark_params.item_process_time)
         super().on_message(msg)
 
 
@@ -64,6 +74,7 @@ async def get_data(params: BenchmarkParams):
     response = await send_blocking_request(params)
 
     for item in response:
+        print(f'Sleeping sync {params.item_process_time}')
         await asyncio.sleep(params.item_process_time)
         process_item(item)
         result.append(item)
@@ -75,14 +86,20 @@ async def get_data(params: BenchmarkParams):
 async def stream_data(request: Request, params: BenchmarkParams):
     response = await send_blocking_request(params)
 
-    channel = DataProcessingChannel(max_workers=6)
-    listener_sse = channel.add_threaded_listener(process_message)
+    channel = DataProcessingChannel(max_workers=1)
+    e = concurrent.futures.ThreadPoolExecutor(max_workers=6)
+    #listener_sse = channel.add_threaded_listener(process_message)
+    listener_sse = Consumer(
+        benchmark_params=params,
+        callback=process_message,
+        executor=e
+    )
+
+    channel.register_listener(listener_sse)
 
     for m in response:
-        await asyncio.sleep(params.item_process_time)
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
-
-    channel.dispatch(listener_sse.id, Message(type=MESSAGE_TYPE_CLOSED))
+    channel.notify_end()
     await listener_sse.start()
     if await request.is_disconnected():
         await listener_sse.stop()
