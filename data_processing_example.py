@@ -2,7 +2,7 @@ import asyncio
 import concurrent.futures
 from logging import getLogger
 from typing import Callable
-
+from time import sleep
 from fastapi import FastAPI, Request
 
 
@@ -34,7 +34,7 @@ class Consumer(ThreadPoolListener):
 
     def on_message(self, msg: Message) -> None:
         logger.debug(f'Sleeping async {self.__benchmark_params.item_process_time}')
-        #time.sleep(self.__benchmark_params.item_process_time)
+        sleep(self.__benchmark_params.item_process_time)
         super().on_message(msg)
 
 
