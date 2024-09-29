@@ -75,9 +75,8 @@ async def get_data(params: BenchmarkParams):
 async def stream_data(request: Request, params: BenchmarkParams):
     response = await send_blocking_request(params)
 
-    listener_sse = ThreadPoolListener(callback=process_message, max_workers=MAX_WORKERS)
-    channel = DataProcessingChannel()
-    channel.register_listener(listener_sse)
+    channel = DataProcessingChannel(max_workers=6)
+    listener_sse = channel.add_threaded_listener(process_message)
 
     for m in response:
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))

@@ -23,15 +23,17 @@ benchmark_params = {
 
 print("Launching with", benchmark_params)
 
-def launch(label: str, callabe, **kwargs):
+def launch(label: str, url: str, params: dict):
+    print(f'starting {label}')
     st = time.time()
-    callabe(**kwargs)
+    result = requests.post(url, json=params)
+    result.raise_for_status()
     print(f"Time {label}", time.time() - st)
 
 with ThreadPoolExecutor(max_workers=2) as e:
 
-    launch(callabe=requests.post, label='naive', url='http://127.0.0.1:8000/start_get', json=benchmark_params)
-    launch(callabe=requests.post, label='threaded', url='http://127.0.0.1:8000/start_sse', json=benchmark_params)
+    e.submit(launch, label='Threaded', url='http://127.0.0.1:8000/start_sse', params=benchmark_params)
+    e.submit(launch, label='Naive', url='http://127.0.0.1:8000/start_get', params=benchmark_params)
 
 
 
