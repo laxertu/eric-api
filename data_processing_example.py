@@ -36,7 +36,7 @@ class Consumer(ThreadPoolListener):
         self.__benchmark_params = benchmark_params
 
     def on_message(self, msg: Message) -> None:
-        print(f'Sleeping async {self.__benchmark_params.item_process_time}')
+        logger.debug(f'Sleeping async {self.__benchmark_params.item_process_time}')
         #time.sleep(self.__benchmark_params.item_process_time)
         super().on_message(msg)
 
@@ -74,7 +74,7 @@ async def get_data(params: BenchmarkParams):
     response = await send_blocking_request(params)
 
     for item in response:
-        print(f'Sleeping sync {params.item_process_time}')
+        logger.debug(f'Sleeping sync {params.item_process_time}')
         await asyncio.sleep(params.item_process_time)
         process_item(item)
         result.append(item)
