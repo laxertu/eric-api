@@ -1,15 +1,12 @@
 import asyncio
 import concurrent.futures
-
-import time
-from logging import getLogger, exception
+from logging import getLogger
 from typing import Callable
 
 from fastapi import FastAPI, Request
 
 
 from eric_sse.prefabs import Message, DataProcessingChannel, ThreadPoolListener
-from eric_sse.entities import MESSAGE_TYPE_CLOSED
 from dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
