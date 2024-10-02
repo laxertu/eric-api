@@ -1,17 +1,16 @@
 import asyncio
 import concurrent.futures
 from logging import getLogger
-from typing import Callable
 from time import sleep
 from fastapi import FastAPI, Request
 
-
-from eric_sse.prefabs import Message, DataProcessingChannel, ThreadPoolListener
+from eric_sse.entities import MessageQueueListener
+from eric_sse.prefabs import Message, DataProcessingChannel
 from dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
 logger = getLogger(__name__)
-MAX_WORKERS = 6
+MAX_WORKERS = 10
 
 @dataclass
 class BenchmarkParams:
@@ -21,21 +20,19 @@ class BenchmarkParams:
     fixture_size: int
 
 
-class Consumer(ThreadPoolListener):
-    from concurrent.futures import ThreadPoolExecutor
+class Consumer(MessageQueueListener):
     def __init__(
             self,
             benchmark_params: BenchmarkParams,
-            callback: Callable[[Message], None],
-            executor: ThreadPoolExecutor
     ):
-        super().__init__(executor=executor, callback=callback)
+        super().__init__()
         self.__benchmark_params = benchmark_params
 
     def on_message(self, msg: Message) -> None:
-        logger.debug(f'Sleeping async {self.__benchmark_params.item_process_time}')
-        sleep(self.__benchmark_params.item_process_time)
-        super().on_message(msg)
+        if msg.type == 'test':
+            logger.debug(f'Sleeping async {self.__benchmark_params.item_process_time}')
+            sleep(self.__benchmark_params.item_process_time)
+            process_message(msg)
 
 
 def create_fixture(size: int) -> list[dict]:
@@ -84,24 +81,22 @@ async def stream_data(request: Request, params: BenchmarkParams):
     response = await send_blocking_request(params)
 
     channel = DataProcessingChannel(max_workers=1)
-    e = concurrent.futures.ThreadPoolExecutor(max_workers=6)
+    e = concurrent.futures.ThreadPoolExecutor(max_workers=10)
     #listener_sse = channel.add_threaded_listener(process_message)
     listener_sse = Consumer(
         benchmark_params=params,
-        callback=process_message,
-        executor=e
     )
 
     channel.register_listener(listener_sse)
 
     for m in response:
         channel.dispatch(listener_sse.id, Message(type='test', payload=m))
-    channel.notify_end()
+
     await listener_sse.start()
     if await request.is_disconnected():
         await listener_sse.stop()
 
-    return EventSourceResponse(await channel.message_stream(listener_sse))
+    return EventSourceResponse(await channel.process_queue(listener_sse))
 
 
 
