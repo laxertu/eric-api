@@ -1,5 +1,5 @@
 import asyncio
-import concurrent.futures
+
 from logging import getLogger
 from time import sleep
 from fastapi import FastAPI, Request
@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from sse_starlette.sse import EventSourceResponse
 
 logger = getLogger(__name__)
-MAX_WORKERS = 10
+MAX_WORKERS = 6
 
 @dataclass
 class BenchmarkParams:
@@ -80,8 +80,7 @@ async def get_data(params: BenchmarkParams):
 async def stream_data(request: Request, params: BenchmarkParams):
     response = await send_blocking_request(params)
 
-    channel = DataProcessingChannel(max_workers=1)
-    e = concurrent.futures.ThreadPoolExecutor(max_workers=10)
+    channel = DataProcessingChannel(max_workers=MAX_WORKERS)
     #listener_sse = channel.add_threaded_listener(process_message)
     listener_sse = Consumer(
         benchmark_params=params,
