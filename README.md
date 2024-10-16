@@ -15,7 +15,7 @@ having to implement some I/O bound service and providing a sandbox to benchmark 
 it simulates a quite common situation, in its simplest form: API depends on an external resource and needs to 
 make a blocking call to it, process the result and return.
 
-**mb.py** is a script that tests performance for naive implementation and the one that uses a 
+**bm.py** is a script that tests performance for naive implementation and the one that uses a 
 Listener that relies on a pool of 6 threads. 
 
 You can modify it and the server to test different input processing 
