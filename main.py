@@ -2,12 +2,12 @@ from logging import getLogger
 
 from fastapi import FastAPI, Request
 from eric_sse.entities import Message
-from eric_sse.servers import ChannelContainer
+from eric_sse.servers import SSEChannelContainer
 from sse_starlette.sse import EventSourceResponse
 
 logger = getLogger(__name__)
 
-channel_container = ChannelContainer()
+channel_container = SSEChannelContainer()
 
 app = FastAPI()
 
@@ -40,3 +40,11 @@ async def stream(request: Request, channel_id: str, listener_id: str):
     if await request.is_disconnected():
         await listener.stop()
     return EventSourceResponse(await channel.message_stream(listener))
+
+@app.delete("/listener/{channel_id}/{listener_id}")
+async def delete_listener(channel_id: str, listener_id: str):
+    channel_container.get(channel_id).remove_listener(listener_id)
+
+@app.delete("/channel/{channel_id}")
+async def delete_channel(channel_id: str):
+    channel_container.rm(channel_id)
