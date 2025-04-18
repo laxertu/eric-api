@@ -64,7 +64,7 @@ async def delete_channel(channel_id: str):
 
 
 def run():
-    host = os.getenv("ERIC_API_HOST", "0.0.0.0")
+    host = os.getenv("ERIC_API_HOST", "127.0.0.1")
     port = int(os.getenv("ERIC_API_PORT", 8000))
     log_level = os.getenv("ERIC_API_LOG_LEVEL", "info")
 

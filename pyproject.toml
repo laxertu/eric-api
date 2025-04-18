@@ -1,6 +1,6 @@
 [project]
 name = "eric-api"
-version = "0.0.1"
+version = "0.0.2"
 description = "A Server side events based messaging microservice implementation"
 keywords = ["Server side events", "microservice", "messaging"]
 

@@ -18,6 +18,8 @@ Start webserver
 
     start-ws
 
+API documentation is available at http://127.0.0.1:8000/docs by default (see below)
+
 Some configuration is allowed by the following environment variables.
 You can set them in a .env file:
 
