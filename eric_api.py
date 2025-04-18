@@ -45,10 +45,17 @@ async def send(channel_id: str, listener_id: str, msg: MessageDto):
 
 @app.get("/stream/{channel_id}/{listener_id}")
 async def stream(request: Request, channel_id: str, listener_id: str):
+    """
+    Opens a connection given a channel id and a listener id.
+
+    A bash monitor would be:
+
+    ***wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1***
+    """
     channel = channel_container.get(channel_id)
     listener = channel.get_listener(listener_id)
     await listener.start()
-    #logger.info(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
+    logger.info(f"wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1")
     if await request.is_disconnected():
         await listener.stop()
     return EventSourceResponse(await channel.message_stream(listener))
