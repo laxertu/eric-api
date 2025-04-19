@@ -1,6 +1,6 @@
 [project]
 name = "eric-api"
-version = "0.0.3"
+version = "0.0.4"
 description = "A Server side events based messaging microservice implementation"
 keywords = ["Server side events", "microservice", "messaging"]
 
@@ -28,9 +28,6 @@ Issues = "https://github.com/laxertu/eric-api/issues"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-start-ws = 'eric_api:run'
 
 [tool.setuptools_scm]
 

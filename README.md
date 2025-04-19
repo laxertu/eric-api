@@ -16,16 +16,9 @@ Installation:
 
 Start webserver
 
-    start-ws
+    uvicorn eric_api:app
 
 API documentation is available at http://127.0.0.1:8000/docs by default (see below)
 
-Some configuration is allowed by the following environment variables.
-You can set them in a .env file:
-
-    ERIC_API_HOST
-    ERIC_API_PORT
-    ERIC_API_LOG_LEVEL
-
-See correspondant uvicorn configuration https://www.uvicorn.org/deployment/#running-from-the-command-line for ERIC_API_LOG_LEVEL 
+See correspondant uvicorn configuration https://www.uvicorn.org/deployment/#running-from-the-command-line 
 
