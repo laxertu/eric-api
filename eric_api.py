@@ -1,9 +1,6 @@
-import logging
 import traceback
 
 from logging import getLogger
-
-import eric_sse
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from eric_sse.entities import Message
@@ -14,8 +11,6 @@ from sse_starlette.sse import EventSourceResponse
 
 
 logger = getLogger(__name__)
-eric_sse.get_logger().level = logging.NOTSET
-
 channel_container = SSEChannelContainer()
 
 class MessageDto(BaseModel):
