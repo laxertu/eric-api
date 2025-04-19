@@ -1,11 +1,20 @@
+import logging
+import traceback
+
 from logging import getLogger
+
+import eric_sse
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from eric_sse.entities import Message
 from eric_sse.servers import SSEChannelContainer
+from eric_sse.exception import InvalidChannelException, InvalidListenerException
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
+
 logger = getLogger(__name__)
+eric_sse.get_logger().level = logging.NOTSET
 
 channel_container = SSEChannelContainer()
 
@@ -17,6 +26,26 @@ class MessageDto(BaseModel):
         return Message(msg_type=self.type, msg_payload=self.payload)
 
 app = FastAPI()
+
+
+@app.exception_handler(Exception)
+async def exception_handler(request: Request, exc: Exception):
+    logger.error(f"{exc}\n{traceback.format_exc()}")
+
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"Unknown error"},
+    )
+
+
+@app.exception_handler(InvalidChannelException)
+@app.exception_handler(InvalidListenerException)
+async def exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=400,
+        content={"message": repr(exc)},
+    )
+
 
 @app.put("/create")
 async def create():
