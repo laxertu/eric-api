@@ -8,10 +8,20 @@ from eric_sse.servers import SSEChannelContainer
 from eric_sse.exception import InvalidChannelException, InvalidListenerException
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
+from os import getenv
+from dotenv import load_dotenv
 
-
+load_dotenv('.eric-api.env')
 logger = getLogger(__name__)
+
 channel_container = SSEChannelContainer()
+
+queues_factory = None
+
+if getenv("QUEUES_FACTORY") == "redis":
+    from eric_redis_queues import RedisQueueFactory
+    queues_factory = RedisQueueFactory()
+
 
 class MessageDto(BaseModel):
     type: str
@@ -44,7 +54,7 @@ async def exception_handler(request: Request, exc: Exception):
 
 @app.put("/create")
 async def create():
-    channel = channel_container.add()
+    channel = channel_container.add(queues_factory=queues_factory)
     return {"channel_id": channel.id}
 
 
