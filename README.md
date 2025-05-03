@@ -14,9 +14,19 @@ Installation:
 
     pip install eric-api
 
+With docker (example)
+
+    docker build -t eric-api-image .
+
+
 Start webserver
 
     uvicorn eric_api:app
+
+With docker (example)
+
+    docker container start eric-api
+
 
 API documentation is available at http://127.0.0.1:8000/docs by default
 

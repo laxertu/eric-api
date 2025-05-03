@@ -1,0 +1,15 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+  api:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+
+volumes:
+  redis:
