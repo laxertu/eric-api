@@ -10,7 +10,7 @@ Features:
 * message deliver to one client
 * SSE compliant streaming
 
-Installation:
+**Installation:**
 
     pip install eric-api
 
@@ -18,8 +18,11 @@ With docker (example)
 
     docker build -t eric-api-image .
 
+a really basic compose.yml is provided, it will install necessay libraries to run API with Redis persistance support.
 
-Start webserver
+
+
+**Start webserver**
 
     uvicorn eric_api:app
 
@@ -27,6 +30,11 @@ With docker (example)
 
     docker container start eric-api
 
+**Redis persistence support**   
+
+Activate it by creating a .eric-api.env with the following:
+
+    QUEUES_FACTORY=redis
 
 API documentation is available at http://127.0.0.1:8000/docs by default
 
