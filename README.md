@@ -40,3 +40,4 @@ API documentation is available at http://127.0.0.1:8000/docs by default
 
 See correspondant uvicorn configuration https://www.uvicorn.org/deployment/#running-from-the-command-line 
 
+Bug Tracker: https://github.com/laxertu/eric-api/issues
