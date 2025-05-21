@@ -32,6 +32,10 @@ Activate it by creating a .eric-api.env with the following:
 
     QUEUES_FACTORY=redis
 
+Redis host is configured by  
+
+    REDIS_HOST=[host to use]
+
 API documentation is available at http://127.0.0.1:8000/docs by default
 
 See correspondant uvicorn configuration https://www.uvicorn.org/deployment/#running-from-the-command-line 

@@ -20,7 +20,7 @@ queues_factory = None
 
 if getenv("QUEUES_FACTORY") == "redis":
     from eric_redis_queues import RedisQueueFactory
-    queues_factory = RedisQueueFactory()
+    queues_factory = RedisQueueFactory(host=getenv("REDIS_HOST", "127.0.0.1"))
 
 
 class MessageDto(BaseModel):
