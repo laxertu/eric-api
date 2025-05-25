@@ -22,8 +22,8 @@ if getenv("QUEUES_FACTORY") == "redis":
     from eric_redis_queues import RedisQueueFactory
     queues_factory = RedisQueueFactory(
         host=getenv("REDIS_HOST", "127.0.0.1"),
-        port=getenv("REDIS_PORT", 6379),
-        db=getenv("REDIS_DB", 0),
+        port=int(getenv("REDIS_PORT", "6379")),
+        db=int(getenv("REDIS_DB", "0")),
     )
 
 
