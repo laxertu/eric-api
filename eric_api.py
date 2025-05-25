@@ -3,7 +3,7 @@ import traceback
 from logging import getLogger
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from eric_sse.entities import Message
+from eric_sse.entities import Message, AbstractChannel
 from eric_sse.servers import SSEChannelContainer
 from eric_sse.exception import InvalidChannelException, InvalidListenerException
 from pydantic import BaseModel
@@ -20,7 +20,11 @@ queues_factory = None
 
 if getenv("QUEUES_FACTORY") == "redis":
     from eric_redis_queues import RedisQueueFactory
-    queues_factory = RedisQueueFactory(host=getenv("REDIS_HOST", "127.0.0.1"))
+    queues_factory = RedisQueueFactory(
+        host=getenv("REDIS_HOST", "127.0.0.1"),
+        port=getenv("REDIS_PORT", 6379),
+        db=getenv("REDIS_DB", 0),
+    )
 
 
 class MessageDto(BaseModel):
@@ -91,6 +95,12 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
     channel_container.get(channel_id).remove_listener(listener_id)
+
+
+@app.get("/channels")
+async def channels() -> list[str]:
+    return [x for x in channel_container.get_all_ids()]
+
 
 @app.delete("/channel/{channel_id}")
 async def delete_channel(channel_id: str):

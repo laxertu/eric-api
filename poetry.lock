@@ -122,21 +122,18 @@ redis = ">=5.2.1,<6.0.0"
 
 [[package]]
 name = "eric-sse"
-version = "0.7.4"
+version = "0.7.6"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-0.7.4-py3-none-any.whl", hash = "sha256:6e7d3b4abda1175218cde7bb6ead89eaa3867144c6ce16b3ad487c62baa75e6b"},
-    {file = "eric_sse-0.7.4.tar.gz", hash = "sha256:af12a90c63da62ffac1cccfebcbc51f3ab0e50ed1fbced04dc6734ab0132fe0b"},
+    {file = "eric_sse-0.7.6-py3-none-any.whl", hash = "sha256:0a867c8cf81fbf45a5a72797f0ffcecd87d533055947cd280a8fd072218dd44f"},
+    {file = "eric_sse-0.7.6.tar.gz", hash = "sha256:9c99d8df4562de22a89ec3a0be68254e66ddf2ad43daa1817cdefafba2218b67"},
 ]
 
 [package.dependencies]
 asyncio = ">=3.4.3,<3.4.4"
-
-[package.extras]
-redis-queues = ["eric-redis-queues (>=0.0.4,<0.0.5)"]
 
 [[package]]
 name = "exceptiongroup"
@@ -489,4 +486,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "5c4e5b34d7f2ab6086ca545dddcb1f0b9c561f3d8ed017426e298e92ddf22fbb"
+content-hash = "4b352a066b9e0894f00ceaf852f0047bd63d1741f74ae18adf81693d39972609"
