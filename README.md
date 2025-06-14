@@ -14,17 +14,9 @@ Features:
 
     pip install eric-api
 
-With docker (example)
-
-    docker build -t eric-api-image .
-
 **Start webserver**
 
     uvicorn eric_api:app
-
-With docker (example)
-
-    docker container start eric-api
 
 **Redis persistence support**   
 
