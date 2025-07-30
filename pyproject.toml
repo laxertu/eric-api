@@ -16,8 +16,8 @@ dependencies = [
     "sse-starlette (>=2.2.1,<3.0.0)",
     "uvicorn (>=0.34.1,<0.35.0)",
     "dotenv (>=0.9.9,<0.10.0)",
-    "eric-redis-queues (>=0.0.4.12,<0.0.7)",
-    "eric-sse (>=0.7.6,<0.8.0)",
+    "eric-redis-queues == 1.0.0a6",
+    "eric-sse == 1.0.0a10",
 ]
 
 [project.urls]

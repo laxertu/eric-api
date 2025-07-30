@@ -3,29 +3,35 @@ import traceback
 from logging import getLogger
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from eric_sse.entities import Message, AbstractChannel
-from eric_sse.servers import SSEChannelContainer
+from eric_sse.entities import Message
+from eric_sse.prefabs import SSEChannel
+from eric_sse.servers import ChannelContainer
 from eric_sse.exception import InvalidChannelException, InvalidListenerException
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from os import getenv
 from dotenv import load_dotenv
 
-load_dotenv('.eric-api.env')
-logger = getLogger(__name__)
 
-channel_container = SSEChannelContainer()
+load_dotenv('.eric-api.env')
+logger = getLogger('uvicorn.error')
+channel_container = ChannelContainer()
 
 queues_factory = None
 
 if getenv("QUEUES_FACTORY") == "redis":
-    from eric_redis_queues import RedisQueueFactory
-    queues_factory = RedisQueueFactory(
+    logger.info('Setting up redis queues')
+    from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelRepository
+    queues_factory = RedisConnectionsRepository(
         host=getenv("REDIS_HOST", "127.0.0.1"),
         port=int(getenv("REDIS_PORT", "6379")),
         db=int(getenv("REDIS_DB", "0")),
     )
 
+    channel_factory = RedisSSEChannelRepository()
+    for channel in channel_factory.load():
+        channel.open()
+        channel_container.register(channel)
 
 class MessageDto(BaseModel):
     type: str
@@ -55,11 +61,17 @@ async def exception_handler(request: Request, exc: Exception):
         content={"message": repr(exc)},
     )
 
+@app.get("/channels")
+async def get_channels(request: Request):
+    return [i for i in channel_container.get_all_ids()]
 
 @app.put("/create")
 async def create():
-    channel = channel_container.add(queues_factory=queues_factory)
-    return {"channel_id": channel.id}
+    new_channel = SSEChannel(connections_repository=queues_factory)
+    channel_container.register(new_channel)
+    new_channel.open()
+    channel_factory.persist(new_channel)
+    return {"channel_id": new_channel.id}
 
 
 @app.post("/subscribe")
@@ -87,10 +99,10 @@ async def stream(request: Request, channel_id: str, listener_id: str):
     """
     channel = channel_container.get(channel_id)
     listener = channel.get_listener(listener_id)
-    await listener.start()
+    listener.start()
     if await request.is_disconnected():
-        await listener.stop()
-    return EventSourceResponse(await channel.message_stream(listener))
+        listener.stop()
+    return EventSourceResponse(channel.message_stream(listener))
 
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
