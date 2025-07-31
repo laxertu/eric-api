@@ -37,12 +37,14 @@ def broadcast(channel_id: str, t: str, pl):
     assert broadcast_response.status_code == 200
 
 def do_stream(channel_id, listener_id):
+    print("**streaimng**")
     client = SSEClient(f'{API_HOST}/stream/{channel_id}/{listener_id}')
 
     for m in client:
         if m.event == 'stop':
             break
         print(m.data)
+    print("done")
 
 
 r = Redis()
@@ -72,27 +74,24 @@ dispatch(channel_id=ch_id_1, listener_id=listener_id_1, t='test', pl={'a': 1})
 # Add a channel
 ch_id_2 = create_channel()
 
+broadcast(ch_id_1,'stop', 'stop')
+broadcast(ch_id_2,'stop', 'stop')
 
-#broadcast(ch_id_1,'stop', 'stop')
-#broadcast(ch_id_2,'stop', 'stop')
-#do_stream(ch_id_1, listener_id_1)
-
+do_stream(ch_id_1, listener_id_1)
 
 print(json.dumps(get(f'{API_HOST}/').json(), indent=4))
 
 
 #--------
-exit(0)
 print("emptying")
-
 channels = get(f'{API_HOST}/channels').json()
 if len(channels) == 0:
     print("No channels found")
 else:
     print("Found {} channels".format(len(channels)))
     for ch_id in channels:
-        print(ch_id)
-        deletion_response = delete(f'{API_HOST}/channel/{channel_id}')
+        print('deleting', ch_id)
+        deletion_response = delete(f'{API_HOST}/channel/{ch_id}')
         assert deletion_response.status_code == 200
 
 
