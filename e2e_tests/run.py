@@ -48,10 +48,11 @@ def do_stream(channel_id, listener_id):
     client = SSEClient(f'{API_HOST}/stream/{channel_id}/{listener_id}')
 
     for m in client:
+        print(m.data)
         if m.event == 'stop':
             break
-        print(m.data)
     print("done")
+
 def clean():
     channels = get(f'{API_HOST}/channels').json()
     if len(channels) == 0:
@@ -83,13 +84,12 @@ broadcast(ch_id_2,'stop', 'stop')
 do_stream(ch_id_1, listener_id_1)
 
 channels_and_listeners = get(f'{API_HOST}/').json()
-print(json.dumps(channels_and_listeners, indent=2))
-"""
-assert channels == {
+
+assert channels_and_listeners == {
     ch_id_1: [listener_id_1, listener_id_2],
     ch_id_2: [listener_id_3]
 }
-"""
+
 clean()
 
 ch_id_4 = create_channel()
