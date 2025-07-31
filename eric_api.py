@@ -1,3 +1,4 @@
+import logging
 import traceback
 
 from logging import getLogger
@@ -15,6 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv('.eric-api.env')
 logger = getLogger('uvicorn.error')
+logger.setLevel(logging.DEBUG)
 channel_container = ChannelContainer()
 
 queues_factory = None
