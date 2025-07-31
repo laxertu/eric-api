@@ -97,8 +97,7 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 
     ***wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1***
     """
-    channel = channel_container.get(channel_id)
-    listener = channel.get_listener(listener_id)
+    listener = channel_container.get(channel_id).get_listener(listener_id)
     listener.start()
     if await request.is_disconnected():
         listener.stop()
