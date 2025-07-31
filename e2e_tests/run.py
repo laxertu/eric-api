@@ -1,4 +1,7 @@
+import json
 import sys
+
+from redis import Redis
 from requests import get, post, put, delete
 
 from sseclient import SSEClient
@@ -8,60 +11,89 @@ try:
 except IndexError:
     API_HOST = 'http://127.0.0.1:8000'
 
+def create_channel() -> str:
+    create_response = put(f'{API_HOST}/create').json()
+    assert 'channel_id' in create_response
+    return create_response['channel_id']
+
+def subscribe(channel_id: str):
+    subscribe_response = post(f'{API_HOST}/subscribe?channel_id={channel_id}').json()
+    assert 'listener_id' in subscribe_response
+
+    return subscribe_response['listener_id']
+
+
+def dispatch(channel_id:str, listener_id:str, t: str, pl):
+    dispatch_response = post(
+        f'{API_HOST}/dispatch?channel_id={channel_id}&listener_id={listener_id}',
+        json={'type': t, 'payload': pl}
+    )
+    assert dispatch_response.status_code == 200
+def broadcast(channel_id: str, t: str, pl):
+    broadcast_response = post(
+        f'{API_HOST}/broadcast?channel_id={channel_id}',
+        json={'type': t, 'payload': pl}
+    )
+    assert broadcast_response.status_code == 200
+
+def do_stream(channel_id, listener_id):
+    client = SSEClient(f'{API_HOST}/stream/{channel_id}/{listener_id}')
+
+    for m in client:
+        if m.event == 'stop':
+            break
+        print(m.data)
+
+
+r = Redis()
+for x in r.scan_iter('*'):
+    r.delete(x)
+#exit(0)
 
 channels = get(f'{API_HOST}/channels').json()
 if len(channels) == 0:
     print("No channels found")
 else:
     print("Found {} channels".format(len(channels)))
-    for channel_id in channels:
-
-        deletion_response = delete(f'{API_HOST}/channel/{channel_id}')
+    for c in channels:
+        print(c)
+        deletion_response = delete(f'{API_HOST}/channel/{c}')
         assert deletion_response.status_code == 200
 
+print("create channel")
 channels = get(f'{API_HOST}/channels').json()
 assert channels == []
 
-create_response = put(f'{API_HOST}/create').json()
-assert 'channel_id' in create_response
+ch_id_1 = create_channel()
+listener_id_1 = subscribe(ch_id_1)
+listener_id_2 = subscribe(ch_id_1)
+dispatch(channel_id=ch_id_1, listener_id=listener_id_1, t='test', pl={'a': 1})
 
-channel_id = create_response['channel_id']
-
-subscribe_response = post(f'{API_HOST}/subscribe?channel_id={channel_id}').json()
-assert 'listener_id' in subscribe_response
-listener_id = subscribe_response['listener_id']
-
-dispatch_response = post(
-    f'{API_HOST}/dispatch?channel_id={channel_id}&listener_id={listener_id}',
-    json={'type': 'test', 'payload': {'a': 1}}
-)
-
-assert dispatch_response.status_code == 200
-
-subscribe_response_2 = post(f'{API_HOST}/subscribe?channel_id={channel_id}').json()
-assert 'listener_id' in subscribe_response_2
-listener_id_2 = subscribe_response_2['listener_id']
+# Add a channel
+ch_id_2 = create_channel()
 
 
-broadcast_response = post(
-    f'{API_HOST}/broadcast?channel_id={channel_id}',
-    json={'type': 'test', 'payload': 'broadcast text'}
-)
-assert broadcast_response.status_code == 200
-
-broadcast_stop_response = post(
-    f'{API_HOST}/broadcast?channel_id={channel_id}',
-    json={'type': 'stop', 'payload': 'stop'}
-)
-
-assert broadcast_response.status_code == 200
+#broadcast(ch_id_1,'stop', 'stop')
+#broadcast(ch_id_2,'stop', 'stop')
+#do_stream(ch_id_1, listener_id_1)
 
 
-client = SSEClient(f'{API_HOST}/stream/{channel_id}/{listener_id}')
+print(json.dumps(get(f'{API_HOST}/').json(), indent=4))
 
-for m in client:
-    if m.event == 'stop':
-        break
-    print(m.data)
+
+#--------
+exit(0)
+print("emptying")
+
+channels = get(f'{API_HOST}/channels').json()
+if len(channels) == 0:
+    print("No channels found")
+else:
+    print("Found {} channels".format(len(channels)))
+    for ch_id in channels:
+        print(ch_id)
+        deletion_response = delete(f'{API_HOST}/channel/{channel_id}')
+        assert deletion_response.status_code == 200
+
 
 print("OK")
