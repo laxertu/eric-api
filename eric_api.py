@@ -18,7 +18,7 @@ logger = getLogger('uvicorn.error')
 channel_container = ChannelContainer()
 
 queues_factory = None
-
+channel_repository = None
 if getenv("QUEUES_FACTORY") == "redis":
     logger.info('Setting up redis queues')
     from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelRepository
@@ -70,7 +70,8 @@ async def create():
     new_channel = SSEChannel(connections_repository=queues_factory)
     channel_container.register(new_channel)
     new_channel.open()
-    channel_repository.persist(new_channel)
+    if channel_repository is not None:
+        channel_repository.persist(new_channel)
     return {"channel_id": new_channel.id}
 
 
@@ -101,7 +102,7 @@ async def stream(request: Request, channel_id: str, listener_id: str):
     listener.start()
     if await request.is_disconnected():
         listener.stop()
-    return EventSourceResponse(channel.message_stream(listener))
+    return EventSourceResponse(channel_container.get(channel_id).message_stream(listener))
 
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
@@ -117,5 +118,6 @@ async def channels() -> list[str]:
 
 @app.delete("/channel/{channel_id}")
 async def delete_channel(channel_id: str):
-    channel_repository.delete(channel_id)
+    if channel_repository is not  None:
+        channel_repository.delete(channel_id)
     channel_container.rm(channel_id)

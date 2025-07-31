@@ -18,6 +18,8 @@ dependencies = [
     "dotenv (>=0.9.9,<0.10.0)",
     "eric-redis-queues == 1.0.0a6",
     "eric-sse == 1.0.0a10",
+    "requests (>=2.32.4,<3.0.0)",
+    "sseclient (>=0.0.27,<0.0.28)",
 ]
 
 [project.urls]
