@@ -109,6 +109,7 @@ async def delete_listener(channel_id: str, listener_id: str):
     channel_container.get(channel_id).remove_listener(listener_id)
 
 
+
 @app.get("/channels")
 async def channels() -> list[str]:
     return [x for x in channel_container.get_all_ids()]
@@ -116,4 +117,5 @@ async def channels() -> list[str]:
 
 @app.delete("/channel/{channel_id}")
 async def delete_channel(channel_id: str):
+    channel_factory.delete(channel_id)
     channel_container.rm(channel_id)
