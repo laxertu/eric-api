@@ -236,14 +236,14 @@ redis = ">=5.2.1,<6.0.0"
 
 [[package]]
 name = "eric-sse"
-version = "1.0.0"
+version = "1.0.1"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-1.0.0-py3-none-any.whl", hash = "sha256:cca2a90481353ebdc97992fc9c801c8437e15ee62ca5049c01b967c3e82d7437"},
-    {file = "eric_sse-1.0.0.tar.gz", hash = "sha256:cd54023daed7133f3af4f3802f48d83a3e5bf3cc0e756acb03441c935938987a"},
+    {file = "eric_sse-1.0.1-py3-none-any.whl", hash = "sha256:a595ad815131170bcb0225d40e6b72cb3ad716d13336d4b770a8859affe7491c"},
+    {file = "eric_sse-1.0.1.tar.gz", hash = "sha256:201e6c2b2f7c12a0aa0aed704e7e27256dc1e4e60e7e86a0bb60b1e2f11d3557"},
 ]
 
 [package.dependencies]
@@ -674,4 +674,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "111da5f471e03b4e91d72ca616bc014b3b906e6e6df713f747605608be1445de"
+content-hash = "909fac5d2a3d68706f17870deeee88415f5e311b89f0e18d0df5d51a8ee2bfdd"

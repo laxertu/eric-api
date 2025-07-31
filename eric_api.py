@@ -109,7 +109,8 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
     channel_container.get(channel_id).remove_listener(listener_id)
-    channel_repository.delete_listener(channel_id, listener_id)
+    if channel_repository is not None:
+        channel_repository.delete_listener(channel_id, listener_id)
 
 @app.get("/channels")
 async def channels() -> list[str]:
