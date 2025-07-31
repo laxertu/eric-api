@@ -220,30 +220,30 @@ python-dotenv = "*"
 
 [[package]]
 name = "eric-redis-queues"
-version = "1.0.0a6"
+version = "1.0.0a8"
 description = "Redis support for eric-sse"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_redis_queues-1.0.0a6-py3-none-any.whl", hash = "sha256:a25b8dc4cdac02ab4951d53789eeb6cf5fd148f8f9d914ecdcba147f3896d2fe"},
-    {file = "eric_redis_queues-1.0.0a6.tar.gz", hash = "sha256:196e4a579547adbe2b709566776e5a19c4fa703592750020b82cc1be9edfa3a9"},
+    {file = "eric_redis_queues-1.0.0a8-py3-none-any.whl", hash = "sha256:bfa056c864bfcce0fd152617716439b6b4084e7e9602fdf3a8f9f7e00379ca68"},
+    {file = "eric_redis_queues-1.0.0a8.tar.gz", hash = "sha256:44ea673e2d18679bf42f96b5691ab43db2ec50d76cc7db3918599997cd5be81b"},
 ]
 
 [package.dependencies]
-eric-sse = ">=1.0.0a10,<2.0.0"
+eric-sse = ">=1.0.0a12,<2.0.0"
 redis = ">=5.2.1,<6.0.0"
 
 [[package]]
 name = "eric-sse"
-version = "1.0.0a10"
+version = "1.0.0a12"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-1.0.0a10-py3-none-any.whl", hash = "sha256:467f483007849a35ed942aa0249b777241a4520fe54e05b6079e58f2c17da44a"},
-    {file = "eric_sse-1.0.0a10.tar.gz", hash = "sha256:4be46db0ac96478b2c7ab4f3b74fb8862b549209ff0d95e4918e0666a9b8bdbc"},
+    {file = "eric_sse-1.0.0a12-py3-none-any.whl", hash = "sha256:540838470360f62b9518615b001eb33312777b389203d39959ab6c57913455b6"},
+    {file = "eric_sse-1.0.0a12.tar.gz", hash = "sha256:863efd307afeea5cfbae4c08de7173eaf90b57d8b8048e684dc5281a7e1c9c19"},
 ]
 
 [package.dependencies]
@@ -674,4 +674,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "d7c4c55e9314afb1b42477be8a50e99ac954ecdddd9d0952f241c77c0101ab8a"
+content-hash = "2e1367dc84faeed7a5a75834da2f574f9c84d2d607a411661a0d8b2c16d5c059"

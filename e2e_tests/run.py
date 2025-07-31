@@ -49,8 +49,19 @@ broadcast_response = post(
 )
 assert broadcast_response.status_code == 200
 
+broadcast_stop_response = post(
+    f'{API_HOST}/broadcast?channel_id={channel_id}',
+    json={'type': 'stop', 'payload': 'stop'}
+)
+
+assert broadcast_response.status_code == 200
+
+
 client = SSEClient(f'{API_HOST}/stream/{channel_id}/{listener_id}')
+
 for m in client:
-    print(m)
+    if m.event == 'stop':
+        break
+    print(m.data)
 
 print("OK")
