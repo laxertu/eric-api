@@ -220,30 +220,30 @@ python-dotenv = "*"
 
 [[package]]
 name = "eric-redis-queues"
-version = "1.0.0a8"
+version = "1.0.0a9"
 description = "Redis support for eric-sse"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_redis_queues-1.0.0a8-py3-none-any.whl", hash = "sha256:bfa056c864bfcce0fd152617716439b6b4084e7e9602fdf3a8f9f7e00379ca68"},
-    {file = "eric_redis_queues-1.0.0a8.tar.gz", hash = "sha256:44ea673e2d18679bf42f96b5691ab43db2ec50d76cc7db3918599997cd5be81b"},
+    {file = "eric_redis_queues-1.0.0a9-py3-none-any.whl", hash = "sha256:f31cebfa8d1da57471108b8397cfa48708adf1f34393755d9d33cb223d25c021"},
+    {file = "eric_redis_queues-1.0.0a9.tar.gz", hash = "sha256:f3f0e8beaab07251f185fb95674f73567a8bbd6d9c99d26060437dc3728206ab"},
 ]
 
 [package.dependencies]
-eric-sse = ">=1.0.0a12,<2.0.0"
+eric-sse = ">=1.0.0a13,<2.0.0"
 redis = ">=5.2.1,<6.0.0"
 
 [[package]]
 name = "eric-sse"
-version = "1.0.0a12"
+version = "1.0.0a13"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-1.0.0a12-py3-none-any.whl", hash = "sha256:540838470360f62b9518615b001eb33312777b389203d39959ab6c57913455b6"},
-    {file = "eric_sse-1.0.0a12.tar.gz", hash = "sha256:863efd307afeea5cfbae4c08de7173eaf90b57d8b8048e684dc5281a7e1c9c19"},
+    {file = "eric_sse-1.0.0a13-py3-none-any.whl", hash = "sha256:78195bbd8f1b77ef13d0448796e9adc8be245c197585a8f6f709312389bc9a92"},
+    {file = "eric_sse-1.0.0a13.tar.gz", hash = "sha256:59369d9690bebe17ac3243c48c38539f4a7cb2ddda208ee7e85b7186a848698b"},
 ]
 
 [package.dependencies]
@@ -674,4 +674,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "2e1367dc84faeed7a5a75834da2f574f9c84d2d607a411661a0d8b2c16d5c059"
+content-hash = "f40fdf2a6f98a8436d75eb1b9938d23bfc85c5d5ff21eb851dc41253ddc2f64e"

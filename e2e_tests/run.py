@@ -83,6 +83,7 @@ broadcast(ch_id_2,'stop', 'stop')
 do_stream(ch_id_1, listener_id_1)
 
 channels_and_listeners = get(f'{API_HOST}/').json()
+print(json.dumps(channels_and_listeners, indent=2))
 """
 assert channels == {
     ch_id_1: [listener_id_1, listener_id_2],
