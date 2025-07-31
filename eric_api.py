@@ -20,7 +20,6 @@ channel_container = ChannelContainer()
 queues_factory = None
 channel_repository = None
 if getenv("QUEUES_FACTORY") == "redis":
-    print('redis!!!')
     logger.info('Setting up redis queues')
     from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelRepository
     queues_factory = RedisConnectionsRepository(
