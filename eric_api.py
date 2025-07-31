@@ -28,8 +28,8 @@ if getenv("QUEUES_FACTORY") == "redis":
         db=int(getenv("REDIS_DB", "0")),
     )
 
-    channel_factory = RedisSSEChannelRepository()
-    for channel in channel_factory.load():
+    channel_repository = RedisSSEChannelRepository()
+    for channel in channel_repository.load():
         channel.open()
         channel_container.register(channel)
 
@@ -70,7 +70,7 @@ async def create():
     new_channel = SSEChannel(connections_repository=queues_factory)
     channel_container.register(new_channel)
     new_channel.open()
-    channel_factory.persist(new_channel)
+    channel_repository.persist(new_channel)
     return {"channel_id": new_channel.id}
 
 
@@ -107,6 +107,7 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
     channel_container.get(channel_id).remove_listener(listener_id)
+    channel_repository.delete_listener(channel_id, listener_id)
 
 
 
@@ -117,5 +118,5 @@ async def channels() -> list[str]:
 
 @app.delete("/channel/{channel_id}")
 async def delete_channel(channel_id: str):
-    channel_factory.delete(channel_id)
+    channel_repository.delete(channel_id)
     channel_container.rm(channel_id)
