@@ -220,14 +220,14 @@ python-dotenv = "*"
 
 [[package]]
 name = "eric-redis-queues"
-version = "1.0.0"
+version = "1.0.1"
 description = "Redis support for eric-sse"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_redis_queues-1.0.0-py3-none-any.whl", hash = "sha256:ebb8581e5c8ccf750bb74ae8b32b5bbda248fa80a1ead6d6af143f6e96470df3"},
-    {file = "eric_redis_queues-1.0.0.tar.gz", hash = "sha256:8e0bc73f3c4104c7974e9cb6c058d7b22a2d21c9aed2d8367a11527c12024b06"},
+    {file = "eric_redis_queues-1.0.1-py3-none-any.whl", hash = "sha256:0852eb0aa84295bb40872be2cdc4298b4ca9f2f620f04eefb4edb5d7c2506075"},
+    {file = "eric_redis_queues-1.0.1.tar.gz", hash = "sha256:afea981abf0a18dcb1f3adba067904f4c360b0b607ca17161cc58fb1c040ffdd"},
 ]
 
 [package.dependencies]
@@ -674,4 +674,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "af41098ddd6741d06326f468280c1c89090ab1d87d33c0bec956edc62838c2cd"
+content-hash = "111da5f471e03b4e91d72ca616bc014b3b906e6e6df713f747605608be1445de"
