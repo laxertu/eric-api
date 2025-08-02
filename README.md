@@ -27,6 +27,8 @@ Activate it by creating a .eric-api.env with the following:
 Redis host is configured by  
 
     REDIS_HOST=[host to use]
+    REDIS_PORT=[port]
+    REDIS_DB=[db number]
 
 API documentation is available at http://127.0.0.1:8000/docs by default
 

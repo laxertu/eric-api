@@ -1,6 +1,6 @@
 [project]
 name = "eric-api"
-version = "1.4.3"
+version = "1.4.3.1"
 description = "A Server side events based messaging microservice implementation"
 keywords = ["sse", "api", "rest", "Server side events", "microservice", "messaging"]
 readme = "README.md"
