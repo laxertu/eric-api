@@ -32,7 +32,7 @@ if getenv("QUEUES_FACTORY") == "redis":
 
     channel_repository = RedisSSEChannelRepository()
     for channel in channel_repository.load():
-        channel.open()
+        channel.load_persisted_data()
         channel_container.register(channel)
 
 class MessageDto(BaseModel):
@@ -71,7 +71,7 @@ async def get_channels(request: Request):
 async def create():
     new_channel = SSEChannel(connections_repository=queues_factory)
     channel_container.register(new_channel)
-    new_channel.open()
+    new_channel.load_persisted_data()
     if channel_repository is not None:
         channel_repository.persist(new_channel)
     return {"channel_id": new_channel.id}
