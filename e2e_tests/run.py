@@ -1,4 +1,3 @@
-import json
 import sys
 
 from requests import get, post, put, delete
