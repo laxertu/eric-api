@@ -13,7 +13,3 @@ networks:
     driver: bridge
     external: true
 
-
-volumes:
-  redis-insight:
-  redis:

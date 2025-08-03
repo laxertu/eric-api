@@ -26,3 +26,8 @@ services:
 networks:
   net:
 
+
+volumes:
+  redis-insight:
+  redis:
+
