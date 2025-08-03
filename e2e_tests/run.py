@@ -95,7 +95,15 @@ clean()
 ch_id_4 = create_channel()
 listener_id_4 = subscribe(ch_id_4)
 delete_listener(ch_id_4, listener_id_4)
+channels_and_listeners = get(f'{API_HOST}/').json()
 
-clean()
+assert channels_and_listeners == {
+    ch_id_4: []
+}
+
+delete_channel(ch_id_4)
+
+channels_and_listeners = get(f'{API_HOST}/').json()
+assert channels_and_listeners == {}
 
 print("OK")
