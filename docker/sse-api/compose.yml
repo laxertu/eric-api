@@ -1,0 +1,19 @@
+services:
+  sse-microservice:
+    container_name: sse-microservice
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - redis_net
+
+networks:
+  redis_net:
+    driver: bridge
+    external: true
+
+
+volumes:
+  redis-insight:
+  redis:
