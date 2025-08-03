@@ -30,7 +30,12 @@ if getenv("QUEUES_FACTORY") == "redis":
         db=int(getenv("REDIS_DB", "0")),
     )
 
-    channel_repository = RedisSSEChannelRepository()
+    channel_repository = RedisSSEChannelRepository(
+        host=getenv("REDIS_HOST", "127.0.0.1"),
+        port=int(getenv("REDIS_PORT", "6379")),
+        db=int(getenv("REDIS_DB", "0")),
+    )
+
     for channel in channel_repository.load():
         channel.load_persisted_data()
         channel_container.register(channel)
