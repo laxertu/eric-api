@@ -1,5 +1,4 @@
-A ready-to-use SSE messaging microservice implementation. 
-Intended for internal use only (all is public here by the moment).
+A ready-to-use SSE messaging microservice implementation.
 
 Backend documentation https://laxertu.github.io/eric/docs.html  
 REST services rely on FastApi + Uvicorn
