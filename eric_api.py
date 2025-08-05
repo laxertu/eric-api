@@ -54,7 +54,7 @@ def get_channel(channel_id: str):
     try:
         return channel_container.get(channel_id)
     except InvalidChannelException:
-        logger.debug(f'No channel found with id {channel_id}. Reloading all channels')
+        logger.debug(f'No channel found with id {channel_id}. Reading from redis')
         if channel_repository is not None:
             return channel_repository.get_channel(channel_id)
 
@@ -63,7 +63,7 @@ def get_listener(channel_id: str, listener_id: str):
     try:
         return selected_channel.get_listener(listener_id)
     except InvalidListenerException:
-        logger.debug(f'No listener found with id {listener_id} in channel {channel_id}. Reloading all channels')
+        logger.debug(f'No listener found with id {listener_id} in channel {channel_id}. Reading from redis')
         selected_channel.load_persisted_data()
 
 
