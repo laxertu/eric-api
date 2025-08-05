@@ -220,38 +220,35 @@ python-dotenv = "*"
 
 [[package]]
 name = "eric-redis-queues"
-version = "1.0.9.1"
+version = "1.0.11.2"
 description = "Redis support for eric-sse"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_redis_queues-1.0.9.1-py3-none-any.whl", hash = "sha256:acb49872eae4ae52cfb0fd3915c4778eb294833039549d8ff29477a7bc5fa2e7"},
-    {file = "eric_redis_queues-1.0.9.1.tar.gz", hash = "sha256:5b15ad28f1eaeeff51d777ec7f9304e9b9601b885d399883af3df7c2fb86b616"},
+    {file = "eric_redis_queues-1.0.11.2-py3-none-any.whl", hash = "sha256:bf19b241afd21beafbd730ae34f26e1099303a16c6f067ce25a703ba572f54c8"},
+    {file = "eric_redis_queues-1.0.11.2.tar.gz", hash = "sha256:c866849269cff97ba4bca3cb1fb5b4e0e0050c5544920c8a5a002f8b8e6a802a"},
 ]
 
 [package.dependencies]
 asyncio = ">=3.4.3,<3.4.4"
-eric-sse = "1.5.2.1"
+eric-sse = "1.5.5"
 redis = "6.2.0"
 
 [[package]]
 name = "eric-sse"
-version = "1.5.2.1"
+version = "1.5.5"
 description = "A lightweight message dispatcher based on SSE protocol data transfer objects format"
 optional = false
 python-versions = "<3.12,>=3.10"
 groups = ["main"]
 files = [
-    {file = "eric_sse-1.5.2.1-py3-none-any.whl", hash = "sha256:5fb3b38544c71700052c8364cdab40dfb59e8a263cbbd56203c7f940c461c4f6"},
-    {file = "eric_sse-1.5.2.1.tar.gz", hash = "sha256:f2f8467f66c41a61c88e5372b2ff4febf430fb1d85c09d7de69fc9987da07f7c"},
+    {file = "eric_sse-1.5.5-py3-none-any.whl", hash = "sha256:f2781c6613d013503c6376c4a52d9cd68a2285f4c072f6cd33e56e69193c790e"},
+    {file = "eric_sse-1.5.5.tar.gz", hash = "sha256:69b0bddd317c3f3ba6c772fe635a142646b7abc4728111a2bdc107b1e50eee36"},
 ]
 
 [package.dependencies]
 asyncio = ">=3.4.3,<3.4.4"
-
-[package.extras]
-eric-redis-queues = ["eric-redis-queues (>=0.0.6,<0.0.7)"]
 
 [[package]]
 name = "exceptiongroup"
@@ -657,4 +654,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "312ed62ec2d2b35abcf8822bd1e7cc4420ef119134b6470176a1677a307277f3"
+content-hash = "685609b50fb2b1a556acde9aaf097f86ea1dfa6f35bf83e1a5cbfb829eeecfc1"

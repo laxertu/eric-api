@@ -1,7 +1,6 @@
 import logging
 import traceback
 from os import getenv
-from typing import Iterable
 
 from dotenv import load_dotenv
 from logging import getLogger
@@ -44,25 +43,28 @@ if getenv("QUEUES_FACTORY") == "redis":
         channel.load_persisted_data()
         channel_container.register(channel)
 
-
+# Below functions are to allow external updates di Redis db (other clients) are detected y handled
 def refresh_channels():
     registered_ids = set(channel_container.get_all_ids())
     for persisted_channel in channel_repository.load():
         if persisted_channel.id not in registered_ids:
             channel_container.register(persisted_channel)
 
-
 def get_channel(channel_id: str):
-
     try:
         return channel_container.get(channel_id)
     except InvalidChannelException:
         logger.debug(f'No channel found with id {channel_id}. Reloading all channels')
-        print(f'No channel found with id {channel_id}. Reloading all channels')
         if channel_repository is not None:
-            refresh_channels()
-            return channel_container.get(channel_id)
+            return channel_repository.get_channel(channel_id)
 
+def get_listener(channel_id: str, listener_id: str):
+    selected_channel = get_channel(channel_id)
+    try:
+        return selected_channel.get_listener(listener_id)
+    except InvalidListenerException:
+        logger.debug(f'No listener found with id {listener_id} in channel {channel_id}. Reloading all channels')
+        selected_channel.load_persisted_data()
 
 
 class MessageDto(BaseModel):
@@ -131,7 +133,7 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 
     ***wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1***
     """
-    listener = get_channel(channel_id).get_listener(listener_id)
+    listener = get_listener(channel_id, listener_id)
     listener.start()
     if await request.is_disconnected():
         listener.stop()
