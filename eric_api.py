@@ -56,7 +56,8 @@ def get_channel(channel_id: str):
     except InvalidChannelException:
         logger.debug(f'No channel found with id {channel_id}. Reading from redis')
         if channel_repository is not None:
-            return channel_repository.get_channel(channel_id)
+            fetched_channel = channel_repository.get_channel(channel_id)
+            channel_container.register(fetched_channel)
 
 def get_listener(channel_id: str, listener_id: str):
     selected_channel = get_channel(channel_id)
