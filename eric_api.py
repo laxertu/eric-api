@@ -43,7 +43,7 @@ if getenv("QUEUES_FACTORY") == "redis":
         channel.load_persisted_data()
         channel_container.register(channel)
 
-# Below functions are to allow external updates di Redis db (other clients) are detected y handled
+# Below functions are to allow external updates to Redis db (other clients) are detected y handled
 def refresh_channels():
     registered_ids = set(channel_container.get_all_ids())
     for persisted_channel in channel_repository.load():
