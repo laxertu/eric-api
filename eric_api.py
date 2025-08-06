@@ -66,6 +66,7 @@ def get_listener(channel_id: str, listener_id: str):
     except InvalidListenerException:
         logger.debug(f'No listener found with id {listener_id} in channel {channel_id}. Reading from redis')
         selected_channel.load_persisted_data()
+        return selected_channel.get_listener(listener_id)
 
 
 class MessageDto(BaseModel):
