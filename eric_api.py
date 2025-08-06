@@ -19,7 +19,6 @@ from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelReposit
 
 load_dotenv('.eric-api.env')
 logger = getLogger('uvicorn.error')
-logger.setLevel(logging.DEBUG)
 channel_container = ChannelContainer()
 
 queues_factory = None
