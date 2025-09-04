@@ -43,10 +43,11 @@ if getenv("QUEUES_FACTORY") == "redis":
 
 # Below functions are to allow external updates to Redis db (other clients) are detected y handled
 def refresh_channels():
-    registered_ids = set(channel_container.get_all_ids())
-    for persisted_channel in channel_repository.load_all():
-        if persisted_channel.id not in registered_ids:
-            channel_container.register(persisted_channel)
+    if channel_repository is not None:
+        registered_ids = set(channel_container.get_all_ids())
+        for persisted_channel in channel_repository.load_all():
+            if persisted_channel.id not in registered_ids:
+                channel_container.register(persisted_channel)
 
 def get_channel(channel_id: str):
     try:
