@@ -111,7 +111,11 @@ async def create():
 
 @app.post("/subscribe")
 async def subscribe(channel_id: str):
-    l = get_channel(channel_id).add_listener()
+    my_channel = get_channel(channel_id)
+    l = my_channel.add_listener()
+    if channel_repository is not None:
+        channel_repository.persist(my_channel)
+
     return {"listener_id": l.id}
 
 @app.post("/broadcast")
