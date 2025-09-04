@@ -52,20 +52,23 @@ def get_channel(channel_id: str):
     try:
         return channel_container.get(channel_id)
     except InvalidChannelException:
-        logger.debug(f'No channel found with id {channel_id}. Reading from redis')
         if channel_repository is not None:
+            logger.debug(f'No channel found with id {channel_id}. Reading from persistence layer')
             fetched_channel = channel_repository.load_one(channel_id)
             channel_container.register(fetched_channel)
+            return channel_container.get(channel_id)
 
 def get_listener(channel_id: str, listener_id: str):
     selected_channel = get_channel(channel_id)
     try:
         return selected_channel.get_listener(listener_id)
     except InvalidListenerException:
-        # refresh channel and retry
-        channel_container.register(channel_repository.load_one(channel_id))
-        selected_channel = get_channel(channel_id)
-        return selected_channel.get_listener(listener_id)
+        if channel_repository is not None:
+            # refresh channel and retry
+            logger.debug(f'No listener with id {listener_id}. Reading from persistence layer')
+            channel_container.register(channel_repository.load_one(channel_id))
+            selected_channel = get_channel(channel_id)
+            return selected_channel.get_listener(listener_id)
 
 
 class MessageDto(BaseModel):
