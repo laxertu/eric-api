@@ -64,6 +64,7 @@ def get_listener(channel_id: str, listener_id: str):
     except InvalidListenerException:
         # refresh channel and retry
         channel_container.register(channel_repository.load_one(channel_id))
+        selected_channel = get_channel(channel_id)
         return selected_channel.get_listener(listener_id)
 
 
