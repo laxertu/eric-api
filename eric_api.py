@@ -62,7 +62,8 @@ def get_listener(channel_id: str, listener_id: str):
     try:
         return selected_channel.get_listener(listener_id)
     except InvalidListenerException:
-        logger.debug(f'No listener found with id {listener_id} in channel {channel_id}. Reading from redis')
+        # refresh channel and retry
+        channel_container.register(channel_repository.load_one(channel_id))
         return selected_channel.get_listener(listener_id)
 
 
