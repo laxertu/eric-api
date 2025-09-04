@@ -1,4 +1,3 @@
-import logging
 import traceback
 from os import getenv
 
@@ -15,7 +14,10 @@ from eric_sse.prefabs import SSEChannel
 from eric_sse.servers import ChannelContainer
 from eric_sse.exception import InvalidChannelException, InvalidListenerException
 
-from eric_redis_queues import RedisConnectionsRepository, RedisSSEChannelRepository
+from eric_redis_queues import RedisConnection
+from eric_redis_queues.repository import RedisSSEChannelRepository, RedisConnectionFactory, RedisConnectionRepository
+
+
 
 load_dotenv('.eric-api.env')
 logger = getLogger('uvicorn.error')
@@ -26,26 +28,23 @@ channel_repository = None
 if getenv("QUEUES_FACTORY") == "redis":
     logger.info('Setting up redis queues')
 
-    queues_factory = RedisConnectionsRepository(
+    redis_connection = RedisConnection(
         host=getenv("REDIS_HOST", "127.0.0.1"),
         port=int(getenv("REDIS_PORT", "6379")),
-        db=int(getenv("REDIS_DB", "0")),
+        db=int(getenv("REDIS_DB", "0"))
     )
 
-    channel_repository = RedisSSEChannelRepository(
-        host=getenv("REDIS_HOST", "127.0.0.1"),
-        port=int(getenv("REDIS_PORT", "6379")),
-        db=int(getenv("REDIS_DB", "0")),
-    )
+    connection_factory = RedisConnectionFactory(redis_connection=redis_connection)
+    queues_factory = RedisConnectionRepository(redis_connection=redis_connection)
+    channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
 
-    for channel in channel_repository.load():
-        channel.load_persisted_data()
+    for channel in channel_repository.load_all():
         channel_container.register(channel)
 
 # Below functions are to allow external updates to Redis db (other clients) are detected y handled
 def refresh_channels():
     registered_ids = set(channel_container.get_all_ids())
-    for persisted_channel in channel_repository.load():
+    for persisted_channel in channel_repository.load_all():
         if persisted_channel.id not in registered_ids:
             channel_container.register(persisted_channel)
 
@@ -55,7 +54,7 @@ def get_channel(channel_id: str):
     except InvalidChannelException:
         logger.debug(f'No channel found with id {channel_id}. Reading from redis')
         if channel_repository is not None:
-            fetched_channel = channel_repository.get_channel(channel_id)
+            fetched_channel = channel_repository.load_one(channel_id)
             channel_container.register(fetched_channel)
 
 def get_listener(channel_id: str, listener_id: str):
@@ -64,7 +63,6 @@ def get_listener(channel_id: str, listener_id: str):
         return selected_channel.get_listener(listener_id)
     except InvalidListenerException:
         logger.debug(f'No listener found with id {listener_id} in channel {channel_id}. Reading from redis')
-        selected_channel.load_persisted_data()
         return selected_channel.get_listener(listener_id)
 
 
@@ -103,9 +101,9 @@ async def get_channels(request: Request):
 
 @app.put("/create")
 async def create():
-    new_channel = SSEChannel(connections_repository=queues_factory)
+    new_channel = SSEChannel(connections_factory=connection_factory)
     channel_container.register(new_channel)
-    new_channel.load_persisted_data()
+
     if channel_repository is not None:
         channel_repository.persist(new_channel)
     return {"channel_id": new_channel.id}
@@ -142,9 +140,10 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
-    get_channel(channel_id).remove_listener(listener_id)
+    channel_object = get_channel(channel_id)
+    channel_object.remove_listener(listener_id)
     if channel_repository is not None:
-        channel_repository.delete_listener(channel_id, listener_id)
+        channel_repository.persist(channel_object)
 
 @app.get("/channels")
 async def channels() -> list[str]:
@@ -162,6 +161,6 @@ async def root():
     refresh_channels()
     result = {}
     for channel_id in channel_container.get_all_ids():
-        result[channel_id] = [listener_id for listener_id in channel_container.get(channel_id).get_listeners_ids()]
+        result[channel_id] = [c.listener.id for c in channel_container.get(channel_id).get_connections()]
     return result
 
