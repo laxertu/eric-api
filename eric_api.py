@@ -12,7 +12,7 @@ from sse_starlette.sse import EventSourceResponse
 from eric_sse.entities import Message
 from eric_sse.prefabs import SSEChannel
 from eric_sse.servers import ChannelContainer
-from eric_sse.exception import InvalidChannelException, InvalidListenerException, ItemNotFound
+from eric_sse.exception import InvalidChannelException, InvalidListenerException, ItemNotFound, RepositoryError
 
 from eric_redis_queues import RedisConnection
 from eric_redis_queues.repository import RedisSSEChannelRepository, RedisConnectionFactory, RedisConnectionRepository
@@ -134,7 +134,6 @@ async def subscribe(channel_id: str):
     if channel_repository is not None:
         channel_repository.persist(my_channel)
 
-    print(f'wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{l.id} 2>&1')
     return {"listener_id": l.id}
 
 
