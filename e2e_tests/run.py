@@ -1,6 +1,6 @@
 import sys
 
-from requests import get, post, put, delete
+from requests import get, post, put, delete, HTTPError
 
 from sseclient import SSEClient
 
@@ -30,18 +30,17 @@ def delete_listener(channel_id, listener_id):
     assert response.status_code == 200
 
 def dispatch(channel_id:str, listener_id:str, t: str, pl):
-    dispatch_response = post(
+    return post(
         f'{API_HOST}/dispatch?channel_id={channel_id}&listener_id={listener_id}',
         json={'type': t, 'payload': pl}
     )
-    assert dispatch_response.status_code == 200
+
 
 def broadcast(channel_id: str, t: str, pl):
-    broadcast_response = post(
+    return post(
         f'{API_HOST}/broadcast?channel_id={channel_id}',
         json={'type': t, 'payload': pl}
     )
-    assert broadcast_response.status_code == 200
 
 def do_stream(channel_id, listener_id):
     client = SSEClient(f'{API_HOST}/stream/{channel_id}/{listener_id}')
@@ -71,16 +70,31 @@ print("create channel")
 ch_id_1 = create_channel()
 listener_id_1 = subscribe(ch_id_1)
 listener_id_2 = subscribe(ch_id_1)
-dispatch(channel_id=ch_id_1, listener_id=listener_id_1, t='test', pl={'a': 1})
+dispatch_response = dispatch(channel_id=ch_id_1, listener_id=listener_id_1, t='test', pl={'a': 1})
+assert dispatch_response.status_code == 200
 
 # Add a channel
 ch_id_2 = create_channel()
 listener_id_3 = subscribe(ch_id_2)
 
-broadcast(ch_id_1,'stop', 'stop')
-broadcast(ch_id_2,'stop', 'stop')
+broadcast_response = broadcast(ch_id_1,'stop', 'stop')
+assert broadcast_response.status_code == 200
+
+broadcast_response = broadcast(ch_id_2,'stop', 'stop')
+assert broadcast_response.status_code == 200
 
 do_stream(ch_id_1, listener_id_1)
+try:
+    do_stream('fake_channel', 'fake_listener')
+except HTTPError as e:
+    assert e.response.status_code == 404
+
+dispatch_response = dispatch(channel_id='fake_channel', listener_id='fake_listener', t='test', pl={'a': 1})
+assert dispatch_response.status_code == 404
+
+broadcast_response = broadcast(channel_id='fake_channel', t='test', pl={'a': 1})
+assert dispatch_response.status_code == 404
+
 
 channels_and_listeners = get(f'{API_HOST}/').json()
 

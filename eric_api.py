@@ -12,11 +12,10 @@ from sse_starlette.sse import EventSourceResponse
 from eric_sse.entities import Message
 from eric_sse.prefabs import SSEChannel
 from eric_sse.servers import ChannelContainer
-from eric_sse.exception import InvalidChannelException, InvalidListenerException
+from eric_sse.exception import InvalidChannelException, InvalidListenerException, ItemNotFound
 
 from eric_redis_queues import RedisConnection
 from eric_redis_queues.repository import RedisSSEChannelRepository, RedisConnectionFactory, RedisConnectionRepository
-
 
 
 load_dotenv('.eric-api.env')
@@ -41,6 +40,7 @@ if getenv("QUEUES_FACTORY") == "redis":
     for channel in channel_repository.load_all():
         channel_container.register(channel)
 
+
 # Below functions are to allow external updates to Redis db (other clients) are detected y handled
 def refresh_channels():
     if channel_repository is not None:
@@ -48,6 +48,7 @@ def refresh_channels():
         for persisted_channel in channel_repository.load_all():
             if persisted_channel.id not in registered_ids:
                 channel_container.register(persisted_channel)
+
 
 def get_channel(channel_id: str):
     try:
@@ -59,11 +60,12 @@ def get_channel(channel_id: str):
             channel_container.register(fetched_channel)
             return channel_container.get(channel_id)
 
+
 def get_listener(channel_id: str, listener_id: str):
-    selected_channel = get_channel(channel_id)
     try:
+        selected_channel = get_channel(channel_id)
         return selected_channel.get_listener(listener_id)
-    except InvalidListenerException:
+    except (InvalidChannelException, InvalidListenerException):
         if channel_repository is not None:
             # refresh channel and retry
             logger.debug(f'No listener with id {listener_id}. Reading from persistence layer')
@@ -78,6 +80,7 @@ class MessageDto(BaseModel):
 
     def to_message(self) -> Message:
         return Message(msg_type=self.type, msg_payload=self.payload)
+
 
 app = FastAPI()
 
@@ -100,10 +103,19 @@ async def exception_handler(request: Request, exc: Exception):
         content={"message": repr(exc)},
     )
 
+@app.exception_handler(ItemNotFound)
+async def exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=404,
+        content={"message": repr(exc)},
+    )
+
+
 @app.get("/channels")
 async def get_channels(request: Request):
     refresh_channels()
     return [i for i in channel_container.get_all_ids()]
+
 
 @app.put("/create")
 async def create():
@@ -122,16 +134,20 @@ async def subscribe(channel_id: str):
     if channel_repository is not None:
         channel_repository.persist(my_channel)
 
+    print(f'wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{l.id} 2>&1')
     return {"listener_id": l.id}
+
 
 @app.post("/broadcast")
 async def broadcast(channel_id: str, msg: MessageDto):
     get_channel(channel_id).broadcast(msg.to_message())
     return None
 
+
 @app.post("/dispatch")
 async def send(channel_id: str, listener_id: str, msg: MessageDto):
     get_channel(channel_id).dispatch(listener_id, msg.to_message())
+
 
 @app.get("/stream/{channel_id}/{listener_id}")
 async def stream(request: Request, channel_id: str, listener_id: str):
@@ -148,12 +164,14 @@ async def stream(request: Request, channel_id: str, listener_id: str):
         listener.stop()
     return EventSourceResponse(get_channel(channel_id).message_stream(listener))
 
+
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
     channel_object = get_channel(channel_id)
     channel_object.remove_listener(listener_id)
     if channel_repository is not None:
         channel_repository.persist(channel_object)
+
 
 @app.get("/channels")
 async def channels() -> list[str]:
@@ -166,6 +184,7 @@ async def delete_channel(channel_id: str):
         channel_repository.delete(channel_id)
     channel_container.rm(channel_id)
 
+
 @app.get("/")
 async def root():
     refresh_channels()
@@ -173,4 +192,3 @@ async def root():
     for channel_id in channel_container.get_all_ids():
         result[channel_id] = [c.listener.id for c in channel_container.get(channel_id).get_connections()]
     return result
-
