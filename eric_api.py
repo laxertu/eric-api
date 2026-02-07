@@ -116,13 +116,16 @@ class MessageDto(BaseModel):
 if getenv("QUEUES_FACTORY") == "redis":
     activate_redis()
 
-activate_logging_channel()
+if getenv("LOGGING_CHANNEL") == "true":
+    logger.info("Setting up logging channel")
+    activate_logging_channel()
+
 app = FastAPI()
 
 
 @app.exception_handler(Exception)
 async def exception_handler(request: Request, exc: Exception):
-    logger.error(f"{exc}\n{traceback.format_exc()}")
+    logger.error(f"{request.url}\n{exc}\n{traceback.format_exc()}")
 
     return JSONResponse(
         status_code=500,
