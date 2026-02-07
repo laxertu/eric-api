@@ -4,28 +4,46 @@ from os import getenv
 from dotenv import load_dotenv
 from logging import getLogger
 
+from eric_sse.interfaces import ChannelRepositoryInterface
+from eric_sse.listener import MessageQueueListener
 from pydantic import BaseModel
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 
-from eric_sse.entities import Message
 from eric_sse.prefabs import SSEChannel
 from eric_sse.servers import ChannelContainer
-from eric_sse.exception import InvalidChannelException, InvalidListenerException, ItemNotFound, RepositoryError
+from eric_sse.exception import InvalidChannelException, InvalidListenerException, ItemNotFound
 
 from eric_redis_queues import RedisConnection
 from eric_redis_queues.repository import RedisSSEChannelRepository, RedisConnectionFactory, RedisConnectionRepository
+from logging import Handler
 
+from eric_sse.entities import AbstractChannel
+from eric_sse.message import Message
 
 load_dotenv('.eric-api.env')
-logger = getLogger('uvicorn.error')
+logger = getLogger(__name__)
 channel_container = ChannelContainer()
 
 queues_factory = None
-channel_repository = None
-if getenv("QUEUES_FACTORY") == "redis":
+channel_repository: ChannelRepositoryInterface | None = None
+connection_factory = None
+
+class EricHandler(Handler):
+
+    def __init__(self, error_dispatching_channel: AbstractChannel, level=0):
+        super().__init__(level)
+        self.__channel = error_dispatching_channel
+
+    def emit(self, record):
+        self.__channel.broadcast(Message(msg_type=record.levelname, msg_payload=self.format(record)))
+
+def activate_redis():
     logger.info('Setting up redis queues')
+    global queues_factory
+    global channel_repository
+    global connection_factory
 
     redis_connection = RedisConnection(
         host=getenv("REDIS_HOST", "127.0.0.1"),
@@ -39,6 +57,19 @@ if getenv("QUEUES_FACTORY") == "redis":
 
     for channel in channel_repository.load_all():
         channel_container.register(channel)
+
+def activate_logging_channel():
+
+    if "_logging" not in channel_container.get_all_ids():
+        logging_channel = SSEChannel(connections_factory=connection_factory, channel_id="_logging")
+        channel_container.register(logging_channel)
+    else:
+        logging_channel = channel_container.get("_logging")
+
+    logging_listener = MessageQueueListener(listener_id="_logging")
+    logging_channel.register_listener(logging_listener)
+
+    logger.addHandler(EricHandler(logging_channel))
 
 
 # Below functions are to allow external updates to Redis db (other clients) are detected y handled
@@ -82,6 +113,10 @@ class MessageDto(BaseModel):
         return Message(msg_type=self.type, msg_payload=self.payload)
 
 
+if getenv("QUEUES_FACTORY") == "redis":
+    activate_redis()
+
+activate_logging_channel()
 app = FastAPI()
 
 
@@ -105,6 +140,7 @@ async def exception_handler(request: Request, exc: Exception):
 
 @app.exception_handler(ItemNotFound)
 async def exception_handler(request: Request, exc: Exception):
+    logger.error(f"Item not found {exc}")
     return JSONResponse(
         status_code=404,
         content={"message": repr(exc)},
@@ -118,8 +154,8 @@ async def get_channels(request: Request):
 
 
 @app.put("/create")
-async def create():
-    new_channel = SSEChannel(connections_factory=connection_factory)
+async def create(channel_id: str | None = None):
+    new_channel = SSEChannel(connections_factory=connection_factory, channel_id=channel_id)
     channel_container.register(new_channel)
 
     if channel_repository is not None:
