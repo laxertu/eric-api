@@ -42,9 +42,7 @@ http://127.0.0.1:8000/docs Swagger
 Environment setup
 =
 
-Configuration file is
-
-.eric-api.env
+Configuration file is **.eric-api.env**
 
 
 **Logging**
