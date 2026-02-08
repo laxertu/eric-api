@@ -23,6 +23,15 @@ from eric_sse.entities import AbstractChannel
 from eric_sse.message import Message
 
 load_dotenv('.eric-api.env')
+import logging
+
+print(getenv('LOGLEVEL', 'INFO'))
+print(logging.getLevelName(getenv('LOGLEVEL', 'INFO')))
+
+logging.basicConfig(
+    level=logging.getLevelName(getenv('LOGLEVEL', 'INFO'))
+)
+
 logger = getLogger(__name__)
 channel_container = ChannelContainer()
 
@@ -59,7 +68,6 @@ def activate_redis():
         channel_container.register(channel)
 
 def activate_logging_channel():
-
     if "_logging" not in channel_container.get_all_ids():
         logging_channel = SSEChannel(connections_factory=connection_factory, channel_id="_logging")
         channel_container.register(logging_channel)
@@ -70,6 +78,7 @@ def activate_logging_channel():
     logging_channel.register_listener(logging_listener)
 
     logger.addHandler(EricHandler(logging_channel))
+    logger.debug('logging channel activated')
 
 
 # Below functions are to allow external updates to Redis db (other clients) are detected y handled
