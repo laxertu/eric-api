@@ -64,15 +64,12 @@ def activate_redis():
     for channel in channel_repository.load_all():
         channel_container.register(channel)
 
-def activate_logging_channel():
-    if "_logging" not in channel_container.get_all_ids():
-        logging_channel = SSEChannel(connections_factory=connection_factory, channel_id="_logging")
+def activate_logging_channel(channel_id: str):
+    if channel_id not in channel_container.get_all_ids():
+        logging_channel = SSEChannel(connections_factory=connection_factory, channel_id=channel_id)
         channel_container.register(logging_channel)
     else:
-        logging_channel = channel_container.get("_logging")
-
-    logging_listener = MessageQueueListener(listener_id="_logging")
-    logging_channel.register_listener(logging_listener)
+        logging_channel = channel_container.get(channel_id)
 
     logger.addHandler(EricHandler(logging_channel))
     logger.debug('logging channel activated')
@@ -122,9 +119,9 @@ class MessageDto(BaseModel):
 if getenv("QUEUES_FACTORY") == "redis":
     activate_redis()
 
-if getenv("LOGGING_CHANNEL") == "true":
+if getenv("LOGGING_CHANNEL") is not None:
     logger.info("Setting up logging channel")
-    activate_logging_channel()
+    activate_logging_channel(getenv("LOGGING_CHANNEL"))
 
 app = FastAPI()
 

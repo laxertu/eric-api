@@ -46,9 +46,9 @@ Activate it by setting .eric-api.env LOGLEVEL variable according to literals sup
     LOGLEVEL=DEBUG
 
 setting LOGGING_CHANNEL to "true" activates a channel that receive broadcasts from logger used in the API. You can enable it
-if you want to open a real time SSE alerting service. Default stream is _logging/_logging. It should be shown in '/' endpoint.
+if you want to open a real time SSE alerting service. It should be returned by '/' endpoint.
 
-    LOGGING_CHANNEL=true
+    LOGGING_CHANNEL=logging_channel_id
 
 **Redis persistence support**   
 
