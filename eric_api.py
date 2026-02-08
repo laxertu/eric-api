@@ -25,9 +25,6 @@ from eric_sse.message import Message
 load_dotenv('.eric-api.env')
 import logging
 
-print(getenv('LOGLEVEL', 'INFO'))
-print(logging.getLevelName(getenv('LOGLEVEL', 'INFO')))
-
 logging.basicConfig(
     level=logging.getLevelName(getenv('LOGLEVEL', 'INFO'))
 )

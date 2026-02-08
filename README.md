@@ -26,6 +26,10 @@ Services exposed are
 http://127.0.0.1:5540/ Redis Insights. Host to use when creating dbs have to be "redis", as per service definition
 http://127.0.0.1:8000/docs Swagger
 
+**Logging**
+
+
+
 
 
 
