@@ -27,7 +27,8 @@ See correspondant uvicorn configuration https://www.uvicorn.org/deployment/#runn
 
 **Bug Tracker**: https://github.com/laxertu/eric-api/issues
 
-**Docker stuff**
+Docker stuff
+=
 
 [Here](https://github.com/laxertu/eric-api/tree/master/docker) you can find a couple of prefabs for redis and api itself
 
