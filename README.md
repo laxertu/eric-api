@@ -1,5 +1,8 @@
 A ready-to-use SSE messaging microservice implementation.
 
+Introduction
+=
+
 Backend documentation https://laxertu.github.io/eric/docs.html  
 REST services rely on FastApi + Uvicorn
 
@@ -27,7 +30,7 @@ http://127.0.0.1:5540/ Redis Insights. Host to use when creating dbs have to be 
 http://127.0.0.1:8000/docs Swagger
 
 Environment setup
-=======
+=
 
 Configuration file is
 
