@@ -12,7 +12,23 @@ Features:
 * message deliver to one client
 * SSE compliant streaming
 
-**Installation:**
+Installation
+============
+
+**Docker**
+=
+
+
+[Here](https://github.com/laxertu/eric-api/tree/master/docker) you can find a couple of prefabs for redis and api itself
+
+Services exposed are
+
+http://127.0.0.1:5540/ Redis Insights. Host to use when creating dbs have to be "redis", as per service definition
+http://127.0.0.1:8000/docs Swagger
+
+
+Pip
+=
 
     pip install eric-api
 
@@ -27,15 +43,6 @@ See correspondant uvicorn configuration https://www.uvicorn.org/deployment/#runn
 
 **Bug Tracker**: https://github.com/laxertu/eric-api/issues
 
-Docker stuff
-=
-
-[Here](https://github.com/laxertu/eric-api/tree/master/docker) you can find a couple of prefabs for redis and api itself
-
-Services exposed are
-
-http://127.0.0.1:5540/ Redis Insights. Host to use when creating dbs have to be "redis", as per service definition
-http://127.0.0.1:8000/docs Swagger
 
 
 

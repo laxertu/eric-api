@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from logging import getLogger
 
 from eric_sse.interfaces import ChannelRepositoryInterface
-from eric_sse.listener import MessageQueueListener
 from pydantic import BaseModel
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -159,7 +158,7 @@ async def get_channels(request: Request):
     return [i for i in channel_container.get_all_ids()]
 
 
-@app.put("/create")
+@app.post("/channel/create")
 async def create(channel_id: str | None = None):
     new_channel = SSEChannel(connections_factory=connection_factory, channel_id=channel_id)
     channel_container.register(new_channel)
