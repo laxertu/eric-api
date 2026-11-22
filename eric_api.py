@@ -2,25 +2,26 @@ import traceback
 from os import getenv
 
 from dotenv import load_dotenv
-from logging import getLogger
 
-from eric_sse.interfaces import ChannelRepositoryInterface
-from eric_sse.listener import MessageQueueListener
+from logging import getLogger
+from logging import Handler
+
 from pydantic import BaseModel
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 
+from redis import Redis
+
+from eric_sse.interfaces import ChannelRepositoryInterface
 from eric_sse.prefabs import SSEChannel
 from eric_sse.servers import ChannelContainer
-from eric_sse.exception import InvalidChannelException, InvalidListenerException, ItemNotFound
-
-from eric_redis_queues import RedisConnection
-from eric_redis_queues.repository import RedisSSEChannelRepository, RedisConnectionFactory, RedisConnectionRepository
-from logging import Handler
-
+from eric_sse.exception import InvalidChannelException, InvalidConnectionException, ItemNotFound
 from eric_sse.entities import AbstractChannel
 from eric_sse.message import Message
+
+from eric_redis_queues.repository import redis_channel_repository_builder
+
 
 load_dotenv('.eric-api.env')
 import logging
@@ -32,9 +33,7 @@ logging.basicConfig(
 logger = getLogger(__name__)
 channel_container = ChannelContainer()
 
-queues_factory = None
-channel_repository: ChannelRepositoryInterface | None = None
-connection_factory = None
+channel_repository: ChannelRepositoryInterface[SSEChannel] | None = None
 
 class EricHandler(Handler):
 
@@ -47,26 +46,29 @@ class EricHandler(Handler):
 
 def activate_redis():
     logger.info('Setting up redis queues')
-    global queues_factory
     global channel_repository
-    global connection_factory
 
-    redis_connection = RedisConnection(
+    redis_client = Redis(
         host=getenv("REDIS_HOST", "127.0.0.1"),
         port=int(getenv("REDIS_PORT", "6379")),
         db=int(getenv("REDIS_DB", "0"))
     )
 
-    connection_factory = RedisConnectionFactory(redis_connection=redis_connection)
-    queues_factory = RedisConnectionRepository(redis_connection=redis_connection)
-    channel_repository = RedisSSEChannelRepository(redis_connection=redis_connection)
+    channel_repository = redis_channel_repository_builder(SSEChannel, redis_client).build()
 
     for channel in channel_repository.load_all():
         channel_container.register(channel)
 
+def new_channel(channel_id: str | None = None) -> SSEChannel:
+    """Channels created through the repository get Redis backed connections, in memory ones otherwise"""
+    if channel_repository is not None:
+        return channel_repository.create({'channel_id': channel_id})
+    return SSEChannel(channel_id=channel_id)
+
+
 def activate_logging_channel(channel_id: str):
     if channel_id not in channel_container.get_all_ids():
-        logging_channel = SSEChannel(connections_factory=connection_factory, channel_id=channel_id)
+        logging_channel = new_channel(channel_id)
         channel_container.register(logging_channel)
     else:
         logging_channel = channel_container.get(channel_id)
@@ -93,19 +95,23 @@ def get_channel(channel_id: str):
             fetched_channel = channel_repository.load_one(channel_id)
             channel_container.register(fetched_channel)
             return channel_container.get(channel_id)
+        raise
 
 
-def get_listener(channel_id: str, listener_id: str):
+def get_connection(channel_id: str, connection_id: str):
     try:
         selected_channel = get_channel(channel_id)
-        return selected_channel.get_listener(listener_id)
-    except (InvalidChannelException, InvalidListenerException):
+        return selected_channel.get_connection(connection_id)
+    except (InvalidChannelException, InvalidConnectionException):
         if channel_repository is not None:
             # refresh channel and retry
-            logger.debug(f'No listener with id {listener_id}. Reading from persistence layer')
+            logger.debug(f'No connection with id {connection_id}. Reading from persistence layer')
+            if channel_id in channel_container.get_all_ids():
+                channel_container.rm(channel_id)
             channel_container.register(channel_repository.load_one(channel_id))
             selected_channel = get_channel(channel_id)
-            return selected_channel.get_listener(listener_id)
+            return selected_channel.get_connection(connection_id)
+        raise
 
 
 class MessageDto(BaseModel):
@@ -137,7 +143,7 @@ async def exception_handler(request: Request, exc: Exception):
 
 
 @app.exception_handler(InvalidChannelException)
-@app.exception_handler(InvalidListenerException)
+@app.exception_handler(InvalidConnectionException)
 async def exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=400,
@@ -155,28 +161,38 @@ async def exception_handler(request: Request, exc: Exception):
 
 @app.get("/channels")
 async def get_channels(request: Request):
+    """
+    Returns a list of all channels ids
+    """
     refresh_channels()
     return [i for i in channel_container.get_all_ids()]
 
 
-@app.put("/create")
+@app.post("/channel/create")
 async def create(channel_id: str | None = None):
-    new_channel = SSEChannel(connections_factory=connection_factory, channel_id=channel_id)
-    channel_container.register(new_channel)
+    """
+    Creates a new channel. Optionally, a channel id can be provided.
+    """
+    created_channel = new_channel(channel_id)
+    channel_container.register(created_channel)
 
     if channel_repository is not None:
-        channel_repository.persist(new_channel)
-    return {"channel_id": new_channel.id}
+        channel_repository.persist(created_channel)
+    return {"channel_id": created_channel.id}
 
 
 @app.post("/subscribe")
-async def subscribe(channel_id: str):
+async def subscribe(channel_id: str) -> dict[str, str]:
+    """
+    Channel subscription endpoint. Returns id if listener created.
+    """
     my_channel = get_channel(channel_id)
-    l = my_channel.add_listener()
+    connection = my_channel.add_connection()
     if channel_repository is not None:
         channel_repository.persist(my_channel)
 
-    return {"listener_id": l.id}
+    # In eric-sse 3 connections are what channels address: their id is exposed as listener id for compatibility
+    return {"listener_id": connection.id}
 
 
 @app.post("/broadcast")
@@ -199,17 +215,15 @@ async def stream(request: Request, channel_id: str, listener_id: str):
 
     ***wget -q -S -O - 127.0.0.1:8000/stream/{channel_id}/{listener_id} 2>&1***
     """
-    listener = get_listener(channel_id, listener_id)
-    listener.start()
-    if await request.is_disconnected():
-        listener.stop()
-    return EventSourceResponse(get_channel(channel_id).message_stream(listener))
+    get_connection(channel_id, listener_id)
+    # message_stream starts the listener itself
+    return EventSourceResponse(get_channel(channel_id).message_stream(listener_id))
 
 
 @app.delete("/listener/{channel_id}/{listener_id}")
 async def delete_listener(channel_id: str, listener_id: str):
     channel_object = get_channel(channel_id)
-    channel_object.remove_listener(listener_id)
+    channel_object.remove_connection(listener_id)
     if channel_repository is not None:
         channel_repository.persist(channel_object)
 
@@ -231,5 +245,5 @@ async def root():
     refresh_channels()
     result = {}
     for channel_id in channel_container.get_all_ids():
-        result[channel_id] = [c.listener.id for c in channel_container.get(channel_id).get_connections()]
+        result[channel_id] = [c.id for c in channel_container.get(channel_id).get_connections()]
     return result

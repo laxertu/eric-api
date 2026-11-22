@@ -10,7 +10,7 @@ except IndexError:
     API_HOST = 'http://127.0.0.1:8000'
 
 def create_channel(channel_id: str | None = None) -> str:
-    create_response = put(f'{API_HOST}/create', {"channel_id": channel_id}).json()
+    create_response = post(f'{API_HOST}/channel/create', {"channel_id": channel_id}).json()
     assert 'channel_id' in create_response
     return create_response['channel_id']
 
